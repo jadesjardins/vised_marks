@@ -1,5 +1,5 @@
 function EEG = marks_add_label(EEG,info_type,mark_prop)
-
+%format
 if ~isfield(EEG,'marks')
     %EEG=marks_init(EEG);
     nflags=0;
