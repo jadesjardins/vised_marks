@@ -69,7 +69,7 @@ end;
 %INSERT g options into vised_config else defaults...
 
 % data options...
-try vised_config.gui=g.pop_gui;
+try vised_config.pop_gui=g.pop_gui;
 catch, if isempty(vised_config.pop_gui);vised_config.pop_gui='on';end
 end;
 
@@ -145,6 +145,15 @@ try vised_config.inter_tag_int=g.inter_tag_int;
 catch, if isempty(vised_config.inter_tag_int);vised_config.inter_tag_int=.002;end
 end
 
+try vised_config.marks_col_int=g.marks_col_int;
+catch, if isempty(vised_config.marks_col_int);vised_config.marks_col_int=.1;end
+end
+
+try vised_config.marks_col_int=g.marks_col_alpha;
+catch, if isempty(vised_config.marks_col_alpha);vised_config.marks_col_alpha=.7;end
+end
+
+
 %eegplot_options...
 try vised_config.srate=g.srate;
 catch, if isempty(vised_config.srate);vised_config.srate=EEG.srate;end
@@ -200,10 +209,22 @@ end
 %        vised_config.ctrlselectcommand={ ['ve_pop_edit(EEG,'''',''off'',''off'');'] 'eegplot(''defmotioncom'', gcbf);' '' };end;
 
 try vised_config.extselectcommand=g.extselectcommand;     catch 
-        vised_config.extselectcommand={ ['EEG=ve_edit(EEG,''quick_chanflag'',''manual'');'] 've_eegplot(''defmotioncom'', gcbf);' '' };end;
+        if isempty(vised_config.extselectcommand{1})
+            vised_config.extselectcommand={ ['EEG=ve_edit(EEG);'] 've_eegplot(''defmotioncom'', gcbf);' '' };
+        end
+end
 try vised_config.altselectcommand=g.altselectcommand;     catch 
-        vised_config.altselectcommand={ ['EEG=ve_edit(EEG);'] 've_eegplot(''defmotioncom'', gcbf);' '' };end;
-
+        if isempty(vised_config.altselectcommand{1})
+            vised_config.altselectcommand={ ['EEG=ve_edit(EEG,''quick_chanflag'',''manual'');'] 've_eegplot(''defmotioncom'', gcbf);' '' };
+        end
+end
+        
+try vised_config.keyselectcommand=g.keyselectcommand;      catch
+        if isempty(vised_config.keyselectcommand{1})
+            vised_config.keyselectcommand={'t,ve_eegplot(''topoplot'',gcbf)'};
+        end
+end
+    
 try vised_config.datastd = g.datastd;                     catch, end;
 try vised_config.normed = g.normed;                       catch, end;
 try vised_config.envelope = g.envelope;                   catch, end;
@@ -215,16 +236,17 @@ if ~isempty(g);
     gfields = fieldnames(g);
     for index=1:length(gfields)
         switch gfields{index}
-            case {  'pop_gui' 'vised_config_page' ...
+            case {  'pop_gui' 'data_type' 'vised_config_page' ...
                     'quick_evtmk' 'quick_evtrm' 'quick_chanflag' ...
                     'srate' 'spacing' 'eloc_file' 'winlength' 'position' 'title' ...
                     'trialstag'  'winrej' 'command' 'tag' 'xgrid' 'ygrid' 'color' ...
                     'submean' 'children' 'limits' 'freqlimits' 'dispchans' 'wincolor' ...
                     'butlabel' 'colmodif' 'scale' 'events' 'ploteventdur' 'data2' 'plotdata2' 'mocap' ...
                     'selectcommand' 'openselectcommand' 'altselectcommand' ...
-                    'extselectcommand' 'datastd' 'normed' 'envelope' 'chaninfo' ...
+                    'extselectcommand' 'keyselectcommand' 'datastd' 'normed' 'envelope' 'chaninfo' ...
                     'chan_marks_struct' 'time_marks_struct' ...
-                    'marks_y_loc' 'inter_mark_int' 'inter_tag_int' 'winrej_marks_labels'},
+                    'marks_y_loc' 'inter_mark_int' 'inter_tag_int' 'winrej_marks_labels' ...
+                    'marks_col_int' 'marks_col_alpha'},
             otherwise, error(['ve_eegplot: unrecognized option: ''' gfields{index} '''' ]);
         end;
     end;
@@ -238,7 +260,7 @@ PropGridStr=['global vecp;global vised_config;' ...
     'properties = properties.GetHierarchy();' ...
     'vecp = PropertyGrid(gcf,' ...
     '''Properties'', properties,' ...
-    '''Position'', [.04 .1 .92 .62]);' ...
+    '''Position'', [.04 .11 .92 .61]);' ...
     ];
 
 if strcmp(vised_config.pop_gui,'on');
@@ -301,6 +323,7 @@ if strcmp(vised_config.pop_gui,'on');
         {7 26 [0 5] [6 1]} ... %10
         {7 26 [0 5.6] [6 1]} ... %11
         {7 26 [6 5.6] [1 1]} ... %12
+        {7 26 [0 26] [7 1]} ... %12
         ...{14 14 [0 9] [5 1]} ... %13
         ...{14 14 [5 9] [2 1]} ... %14
         ...{14 14 [0 10.5] [7 1]} ... %14
@@ -357,6 +380,7 @@ if strcmp(vised_config.pop_gui,'on');
         'callback', ['[marktypeIndex,marktypeStr,marktypeCell]=pop_chansel({EEG.marks.time_info.label});' ...
         'set(findobj(gcbf, ''tag'', ''edt_marktype''), ''string'', vararg2str(marktypeCell))']}, ...
         ... %13
+        {'style','checkbox','string','Update VISED_CONFIG global variable','value',1}, ...
         ...            {'Style', 'text', 'string', 'quick event label [empty = do not do quick event]'}, ...
         ... %14
         ...            {'Style', 'edit', 'string', vised_config.quick_evtmk, 'tag', 'edt_quick_evtmk'}, ...
@@ -383,20 +407,20 @@ if strcmp(vised_config.pop_gui,'on');
     if isempty(results);com='';return;end
     
     vised_config.data_type=data_typeCell{results{1}};
-    chan_index=results{2};
-    event_type=results{3};
+    vised_config.chan_index=results{2};
+    vised_config.event_type=results{3};
     vised_config.winrej_marks_labels=eval(['{',results{4},'}']);
-    
+    update_global=results{5};
     
 end
 %% ONCE ALL INPUTS ARE ESTABLISHED ...
 
         % HANDLE chan_index
         chans=[];
-        if ischar(chan_index);
-            chans=eval(chan_index);
+        if ischar(vised_config.chan_index);
+            chans=eval(vised_config.chan_index);
         else
-            chans=chan_index;
+            chans=vised_config.chan_index;
         end
         
         % HANDLE data_type
@@ -444,16 +468,16 @@ end
         
         % HANDLE event_type...
 
-        if ischar(event_type);
-            event_type=eval(['{',event_type,'}']);
+        if ischar(vised_config.event_type);
+            vised_config.event_type=eval(['{',vised_config.event_type,'}']);
         end
         
         j=0;
-        if isempty(event_type);
+        if isempty(vised_config.event_type);
             VisEd.event = [];
         else
             for i=1:length(EEG.event);
-                if ~isempty(find(strcmp(EEG.event(i).type,event_type)));
+                if ~isempty(find(strcmp(EEG.event(i).type,vised_config.event_type)));
                     event=EEG.event(i);
                     event.index=i;
                     event.proc='none';
@@ -465,27 +489,27 @@ end
         vised_config.tmp_events=VisEd.event;
         
         if ~isempty(vised_config.quick_evtmk)%overwrites vised_config.altselectcommand
-            vised_config.altselectcommand={ ['ve_pop_edit(EEG,''', ...
+            vised_config.altselectcommand={ ['ve_edit(EEG,''quick_evtmk'',''', ...
                                               vised_config.quick_evtmk, ...
-                                              ''',''off'',''off'');'] ...
+                                              ''');'] ...
                                               've_eegplot(''defmotioncom'', gcbf);' '' };
         end
         
         switch vised_config.quick_evtrm
             case 'ext_press'
-                vised_config.extselectcommand={ ['ve_pop_edit(EEG,'''',''on'',''off'');'] ...
+                vised_config.extselectcommand={ ['ve_edit(EEG,''quick_evtrm'',''on'');'] ...
                                               've_eegplot(''defmotioncom'', gcbf);' '' };
             case 'alt_press'
-                vised_config.altselectcommand={ ['ve_pop_edit(EEG,'''',''on'',''off'');'] ...
+                vised_config.altselectcommand={ ['ve_edit(EEG,''quick_evtrm'',''on'');'] ...
                                               've_eegplot(''defmotioncom'', gcbf);' '' };
         end
         
         switch vised_config.quick_chanflag
             case 'ext_press'
-                vised_config.extselectcommand={ ['ve_pop_edit(EEG,'''',''off'',''on'');'] ...
+                vised_config.extselectcommand={ ['ve_edit(EEG,''quick_chanflag'',''manual'');'] ...
                                               've_eegplot(''defmotioncom'', gcbf);' '' };
             case 'alt_press'
-                vised_config.altselectcommand={ ['ve_pop_edit(EEG,'''',''off'',''on'');'] ...
+                vised_config.altselectcommand={ ['ve_edit(EEG,''quick_chanflag'',''manual'');'] ...
                                               've_eegplot(''defmotioncom'', gcbf);' '' };
         end
         
@@ -493,9 +517,19 @@ end
 
 %% PREPARE VARIABLES FOR EEGPLOT ...
 if EEG.trials > 1
-    rejE=zeros(EEG.nbchan,EEG.trials);
-    rej=marks_label2index(vised_config.time_marks_struct,vised_config.winrej_marks_labels,'indexes');
-    rejeegplot=trial2eegplot(rej,rejE,EEG.pnts,vised_config.wincolor);
+    %rejE=zeros(EEG.nbchan,EEG.trials);
+    %rej=marks_label2index(vised_config.time_marks_struct,vised_config.winrej_marks_labels,'indexes');
+    %rejeegplot=trial2eegplot(rej,rejE,EEG.pnts,vised_config.wincolor);
+    j=0;
+    for i=1:EEG.trials;
+        if any(EEG.marks.time_info(1).flags(1,:,i));
+            j=j+1;
+            rejeegplot(j,1)=(EEG.pnts*i)-(EEG.pnts-1);
+            rejeegplot(j,2)=(EEG.pnts*i);
+            rejeegplot(j,3:5)=vised_config.wincolor;
+            rejeegplot(j,6:EEG.nbchan+5)=zeros(1,EEG.nbchan);
+        end
+    end
 else
     rejeegplot=marks_label2index(vised_config.time_marks_struct,vised_config.winrej_marks_labels,'bounds');
 end
@@ -534,4 +568,20 @@ for i=1:length(vararg_cell);
 end
 ve_eegplot(data, vararg_cell{:});
 %% RETURN COMMAND AND EVALUATE CALL TO VISED
-com=sprintf('EEG = pop_vised( %s, {%s});', inputname(1), vararg2str(event_type));
+com=sprintf('EEG = pop_vised( %s, {%s});', inputname(1), vararg2str(vised_config.event_type));
+
+%% UPDATE VISED_CONFIG GLOBAL VARIABLE IF REQUESTED...
+if update_global;
+    %remove some file specific variables first...
+    tmp_vised_config=vised_config;
+    tmp_vised_config.chan_index=[];
+    tmp_vised_config.chan_marks_struct=[];
+    tmp_vised_config.time_marks_struct=[];
+    tmp_vised_config.eloc_file=[];
+    tmp_vised_config.tmp_events=[];
+    tmp_vised_config.chaninfo=[];
+    
+    VISED_CONFIG=tmp_vised_config;
+end
+
+

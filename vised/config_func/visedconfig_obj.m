@@ -13,11 +13,14 @@ classdef visedconfig_obj
         quick_evtrm='off'
         quick_chanflag='off'
         
+        
         chan_marks_struct=[]
         time_marks_struct=[]
         marks_y_loc=[]
         inter_mark_int=[]
         inter_tag_int=[]
+        marks_col_int=[];
+        marks_col_alpha=[];
 
 
         %eegplot options

@@ -89,7 +89,8 @@ if nargin < 5
             mark_ind=find(strcmp(g.quick_chanflag, {g.chan_marks_struct.label}));
             if isempty(mark_ind);
                 if strcmp(g.data_type,'EEG');info_type='chan_info';else info_type='comp_info';end;
-                [EEG,com]=pop_marks_add_label(EEG,'info_type',info_type,'label',g.quick_chanflag,'message','BBBOOOOOOYYYAAAAAAAA!!!!!');
+                [EEG,com]=pop_marks_add_label(EEG,'info_type',info_type,'label',g.quick_chanflag, ...
+                                                'message','Fill in the missing information for the mark that you are adding.');
                 mark_ind=length(g.chan_marks_struct)+1;
                 g.chan_marks_struct(mark_ind).label=g.quick_chanflag;
                 switch g.data_type

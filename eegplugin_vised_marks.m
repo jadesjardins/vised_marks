@@ -38,7 +38,7 @@ function eegplugin_vised_marks(fig,try_strings,catch_strings)
 % ---------------------
 filemenu=findobj(fig,'label','File');
 editmenu=findobj(fig,'label','Edit');
-configmenu=uimenu(filemenu,'label','vised configuration','separator','on');
+%configmenu=uimenu(filemenu,'label','vised configuration','separator','on');
 %visedmenu=uimenu(editmenu,'label','Visually edit in scroll plot','separator','on');
 
 % Create "pop_vised" callback cmd.
@@ -47,31 +47,33 @@ VisEd_cmd='[EEG,LASTCOM] = pop_vised(EEG,''pop_gui'',''on'');';
 finalcmdVE=[try_strings.no_check VisEd_cmd catch_strings.add_to_hist];
 
 %CONFIG
+vc_menu=uimenu(filemenu, 'Label', 'Vised configuration','separator','on', ...
+                'callback','VISED_CONFIG=pop_edit_vised_config;');
 % New
-cmdNVEC=['clear global VISED_CONFIG;',...
-     'global VISED_CONFIG;', ...
-     'VISED_CONFIG=visedconfig_obj;', ...
-     'properties=visedconfig2propgrid();' ...
-     'properties = properties.GetHierarchy();' ...
-     'vecp=PropertyGrid(''Properties'', properties);'...
-     'uiwait;' ...
-     'VISED_CONFIG=propgrid2visedconfig(vecp);'];
+%cmdNVEC=['clear global VISED_CONFIG;',...
+%     'global VISED_CONFIG;', ...
+%     'VISED_CONFIG=visedconfig_obj;', ...
+%     'properties=visedconfig2propgrid();' ...
+%     'properties = properties.GetHierarchy();' ...
+%     'vecp=PropertyGrid(''Properties'', properties);'...
+%     'uiwait;' ...
+%     'VISED_CONFIG=propgrid2visedconfig(vecp);'];
 
 % Load
-cmdLVEC='pop_load_visedconfig();';
+%cmdLVEC='pop_load_visedconfig();';
 
 % Edit
-cmdEVEC=['properties=visedconfig2propgrid();' ...
-     'properties = properties.GetHierarchy();' ...
-     'vecp=PropertyGrid(''Properties'', properties);' ...
-     'uiwait;' ...
-     'VISED_CONFIG=propgrid2visedconfig(vecp);'];
+%cmdEVEC=['properties=visedconfig2propgrid();' ...
+%     'properties = properties.GetHierarchy();' ...
+%     'vecp=PropertyGrid(''Properties'', properties);' ...
+%     'uiwait;' ...
+%     'VISED_CONFIG=propgrid2visedconfig(vecp);'];
 
 % Save
-cmdSVEC='pop_save_visedconfig();';
+%cmdSVEC='pop_save_visedconfig();';
 
 % Clear
-cmdCVEC='clear global VISED_CONFIG';
+%cmdCVEC='clear global VISED_CONFIG';
 
 
 % Create "pop_loadrmtclstcfg" callback cmd.
@@ -90,11 +92,11 @@ uimenu(editmenu, 'label', 'Visually edit in scroll plot', 'callback', finalcmdVE
 %uimenu(visedconfigmenu,'label','Load','callback',finalcmdLVEC,'userdata','startup:on');
 %uimenu(visedconfigmenu,'label','Edit');
 %uimenu(visedconfigmenu,'label','Save','callback',finalcmdSVEC);
-uimenu(configmenu,'label','New','callback',cmdNVEC);
-uimenu(configmenu,'label','Load','callback',cmdLVEC);
-uimenu(configmenu,'label','Edit properties','callback',cmdEVEC);
-uimenu(configmenu,'label','Save','callback',cmdSVEC);
-uimenu(configmenu,'label','Clear','callback',cmdCVEC);
+%uimenu(configmenu,'label','New','callback',cmdNVEC);
+%uimenu(configmenu,'label','Load','callback',cmdLVEC);
+%uimenu(configmenu,'label','Edit properties','callback',cmdEVEC);
+%uimenu(configmenu,'label','Save','callback',cmdSVEC);
+%uimenu(configmenu,'label','Clear','callback',cmdCVEC);
 
 
 %%marks
@@ -129,13 +131,13 @@ finalcmdMFG=[try_strings.no_check cmd catch_strings.new_and_hist];
 cmd='[EEG,LASTCOM]=pop_marks_event_gap(EEG);';
 finalcmdMEG=[try_strings.no_check cmd catch_strings.new_and_hist];
 
-cmd='[EEG,LASTCOM]=pop_marks_label2manual(EEG);';
+cmd='[EEG,LASTCOM]=pop_marks_merge_labels(EEG);';
 finalcmdCFM=[try_strings.no_check cmd catch_strings.new_and_hist];
 
 cmd='[EEG,LASTCOM]=pop_marks_add_label(EEG);';
 finalcmdARF=[try_strings.no_check cmd catch_strings.new_and_hist];
 
-cmd='[EEG,LASTCOM]=pop_marks_purge_data(EEG);';
+cmd='[EEG,LASTCOM]=pop_marks_select_data(EEG);';
 finalcmdMPD=[try_strings.no_check cmd catch_strings.new_and_hist];
 
 % Add submenus to the "marks" submenu.
@@ -149,8 +151,8 @@ uimenu(epochmenu,'label','Concatenate epochs into continuous data','callback',fi
 uimenu(editmenu,'label','Collect ''reject'' structure into ''marks'' structure','callback',finalcmdR2M);
 uimenu(editmenu,'label','Mark flag gaps','callback',finalcmdMFG);
 uimenu(editmenu,'label','Mark event gaps','callback',finalcmdMEG);
-uimenu(editmenu,'label','Combine flag types into to ''manual'' type','callback',finalcmdCFM);
+uimenu(editmenu,'label','Combine flag types','callback',finalcmdCFM);
 uimenu(editmenu,'label','Add/remove/clear marks flag type','callback',finalcmdARF);
 
 
-uimenu(marksmenu,'label','Purge flagged data','callback',finalcmdMPD);
+uimenu(marksmenu,'label','Select data','callback',finalcmdMPD);

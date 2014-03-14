@@ -309,7 +309,8 @@ if ~isstr(data) % If NOT a 'noui' call or a callback from uicontrols
                'selectcommand' 'altselectcommand' 'extselectcommand'  'keyselectcommand'...
                'datastd' 'normed' 'envelope' 'chaninfo' ...
                'data_type' 'chan_marks_struct' 'time_marks_struct' ...
-               'marks_y_loc' 'inter_mark_int' 'inter_tag_int'},;
+               'marks_y_loc' 'inter_mark_int' 'inter_tag_int' ...
+               'marks_col_int' 'marks_col_alpha'},;
       otherwise, error(['ve_eegplot: unrecognized option: ''' gfields{index} '''' ]);
       end;
    end;
@@ -1208,29 +1209,24 @@ else
         cflags=double([g.time_marks_struct(tmi).flags(lowlim:highlim);g.time_marks_struct(tmi).flags(lowlim:highlim)]);
         cdat=cflags;
         
-        zero_ind=find(cdat(1,:)==0);
-        
-        if ~isempty(zero_ind)
-            j=j+1;
-            cdat(:,zero_ind)=j-1;
-            cmap(j,:)=[1 1 1];
+        cdat=g.marks_col_int*round(cflags/g.marks_col_int);
+        tmp_cdat=cdat;
+        uval=unique(cdat);
+        for ci=1:length(uval);
+            tmp_cdat(find(cdat==uval(ci)))=ci+j-1;
+            cmap(ci+j,:)=ones(1,3)-((ones(1,3)-g.time_marks_struct(tmi).color)*uval(ci));
         end
-        
-        if length(zero_ind)<size(cdat,2);
-            one_ind=setdiff(1:size(cdat,2),zero_ind);
-            j=j+1;
-            cdat(:,one_ind)=j-1;
-            cmap(j,:)=g.time_marks_struct(tmi).color;
-        end
+        j=j+length(uval);
+        cdat=tmp_cdat;
         
         for i=1:length(time_marks_offset)
             sh=surf(1:size(cflags,2), ...
                 [inter_time_mark_offset*tmi+(time_marks_offset(i))-(inter_time_mark_offset*length(g.time_marks_struct)), ...
                 inter_time_mark_offset*tmi+(time_marks_offset(i))+inter_time_mark_offset-(inter_time_mark_offset*length(g.time_marks_struct))], ...
-                cflags/100, ...
+                cflags, ...
                 'CData',cdat, ...
                 'LineStyle','none');
-            alpha(sh,0.7);
+            alpha(sh,g.marks_col_alpha);
         end
     end
     colormap(cmap); 

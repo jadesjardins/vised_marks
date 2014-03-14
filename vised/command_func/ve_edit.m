@@ -78,7 +78,7 @@ clear tmpChanIndex
 
 % Check for event selection.
 %if ~isempty(EEG.event);
-    pntdist=ceil((g.winlength*g.srate)*0.001);
+    pntdist=ceil((g.winlength*g.srate)*0.002);
     % Check for event selection.
     if isfield(g.eventedit, 'SelEventStruct');
         g=rmfield(g.eventedit,'SelEventStruct');

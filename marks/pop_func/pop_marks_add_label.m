@@ -82,7 +82,7 @@ catch
             g.order = [];
             order_enable='off';
         otherwise
-            g.order = [0];
+            g.order = [1];
             order_enable='on';
     end
 end

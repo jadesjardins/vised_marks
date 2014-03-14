@@ -141,10 +141,10 @@ bounds=[];
 flags=[];
 
 %% GAP DETECTION OR INTERVAL DETECTION...
-if ~g.interval %gap detection...
+if strcmp(g.interval,'off'); %gap detection...
 
     crit_dur_pnts=ceil(crit_dur_ms/(1000/EEG.srate));
-    crit_dur_pnts=ceil(crit_dur_ms/(1000/EEG.srate));
+    crit_dur_pnts=ceil(crit_dur_ms/(1000/EEG.srate))
     
     j=0;
     for ei=1:length(EEG.event);
@@ -253,7 +253,7 @@ else %g.interval
                 end
                 if strcmp(EEG.event(i).type,event_type{2});
                     k=k+1;
-                    event_start_latency(k)=EEG.event(i).latency;
+                    event_end_latency(k)=EEG.event(i).latency;
                 end
             case 'off'
                 if ~isempty(strfind(EEG.event(i).type,event_type{1}));
@@ -282,8 +282,8 @@ else %g.interval
                 b2=event_end_latency;
         end
         for i=1:length(event_start_latency);
-            bounds(i,1)=floor(b1+offset_pnts(1));
-            bounds(i,2)=ceil(b2+offset_pnts(2));
+            bounds(i,1)=floor(b1(i)+offset_pnts(1));
+            bounds(i,2)=ceil(b2(i)+offset_pnts(2));
         end
     else
         disp('number of start events does not match the number of end events... doing nothing');

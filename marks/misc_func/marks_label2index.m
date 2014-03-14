@@ -4,7 +4,7 @@ function out_array=marks_label2index(marks_struct,labels,out_type,varargin)
 try
     options = varargin;
     for index = 1:length(options)
-        if iscell(options{index}) & ~iscell(options{index}{1}), options{index} = { options{index} }; end;
+        if iscell(options{index}) && ~iscell(options{index}{1}), options{index} = { options{index} }; end;
     end;
     if ~isempty( varargin ), g=struct(options{:});
     else g= []; end;
@@ -13,6 +13,7 @@ catch
 end;
 
 try g.exact; catch, g.exact='on';end
+try g.invert; catch, g.invert='off';end
 
 if strcmp(g.exact,'off')
     labels=marks_match_label(labels,{marks_struct.label});
@@ -42,6 +43,10 @@ for i=1:length(labels);
 end
 
 flags=any(flagscat,1);
+if strcmp(g.invert,'on')
+    flags=~flags;
+end
+
 switch out_type
     case 'flags'
         out_array=flags;
