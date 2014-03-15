@@ -516,6 +516,7 @@ end
 
 
 %% PREPARE VARIABLES FOR EEGPLOT ...
+rejeegplot=[];
 if EEG.trials > 1
     %rejE=zeros(EEG.nbchan,EEG.trials);
     %rej=marks_label2index(vised_config.time_marks_struct,vised_config.winrej_marks_labels,'indexes');
