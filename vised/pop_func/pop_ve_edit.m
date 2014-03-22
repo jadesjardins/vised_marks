@@ -56,13 +56,16 @@
 
 
 
-function [EEG,g,com]=pop_ve_edit(EEG,g, Latency, EventType, EventIndex, Proc)
+function g=pop_ve_edit(g, Latency, EventType, EventIndex, Proc)
 % the command output is a hidden output that does not have to
 % be described in the header
 com = ''; % this initialization ensure that the function will return something
 % if the user press the cancel button
 % display help if not enough arguments
 % ------------------------------------
+
+udf=get(gcf, 'userdata');
+uda=get(gca,'userdata');
 
 if nargin < 1
     help pop_sig_EditEvent;
@@ -79,37 +82,39 @@ if nargin < 5
         tmp.event(1).Dist=0;
         tmp.event(1).type='User';
         tmp.event(1).latency=g.eventedit.PosLat;
-        if length(g.datasize)==3;
-            tmp.event(1).epoch=floor(tmp.event(1).latency/g.datasize(3));
+        if length(size(uda))==3;
+            tmp.event(1).epoch=floor(tmp.event(1).latency/size(uda,3));
         end
         
         if ~isempty(g.quick_evtmk);
             results = {1 g.quick_evtmk 1 0 '' {''}};
         elseif ~isempty(g.quick_chanflag);
-            mark_ind=find(strcmp(g.quick_chanflag, {g.chan_marks_struct.label}));
+            mark_ind=find(strcmp(g.quick_chanflag, {udf.chan_marks_struct.label}));
             if isempty(mark_ind);
-                if strcmp(g.data_type,'EEG');info_type='chan_info';else info_type='comp_info';end;
-                [EEG,com]=pop_marks_add_label(EEG,'info_type',info_type,'label',g.quick_chanflag, ...
+                if strcmp(udf.data_type,'EEG');info_type='chan_info';else info_type='comp_info';end;
+                tmp_marks_struct.chan_info=udf.chan_marks_struct;
+                tmp_marks_struct=pop_marks_add_label(tmp_marks_struct,'info_type',info_type,'label',g.quick_chanflag, ...
                                                 'message','Fill in the missing information for the mark that you are adding.');
-                mark_ind=length(g.chan_marks_struct)+1;
-                g.chan_marks_struct(mark_ind).label=g.quick_chanflag;
-                switch g.data_type
-                    case 'EEG'
-                        ind=length(EEG.marks.chan_info);
-                        g.chan_marks_struct(mark_ind).line_color=EEG.marks.chan_info(ind).line_color;
-                        g.chan_marks_struct(mark_ind).tag_color=EEG.marks.chan_info(ind).tag_color;
-                        g.chan_marks_struct(mark_ind).order=EEG.marks.chan_info(ind).order;
-                    case 'ICA'
-                        ind=length(EEG.marks.comp_info);
-                        g.chan_marks_struct(mark_ind).line_color=EEG.marks.comp_info(ind).line_color;
-                        g.chan_marks_struct(mark_ind).tag_color=EEG.marks.comp_info(ind).tag_color;
-                        g.chan_marks_struct(mark_ind).order=EEG.marks.comp_info(ind).order;
-                end
-                g.chan_marks_struct(mark_ind).flags=zeros(size(g.chan_marks_struct(1).flags));
+                udf.chan_marks_struct=tmp_marks_struct.chan_info;
+                mark_ind=length(udf.chan_marks_struct);
+                %udf.chan_marks_struct(mark_ind).label=g.quick_chanflag;
+                %switch udf.data_type
+                %    case 'EEG'
+                %        ind=length(udf.chan_marks_struct);
+                %        udf.chan_marks_struct(mark_ind).line_color=udf.chan_marks_struct(ind).line_color;
+                %        udf.chan_marks_struct(mark_ind).tag_color=udf.chan_marks_struct(ind).tag_color;
+                %        udf.chan_marks_struct(mark_ind).order=udf.chan_marks_struct(ind).order;
+                %    case 'ICA'
+                %        ind=length(udf.chan_marks_struct);
+                %        udf.chan_marks_struct(mark_ind).line_color=udf.chan_marks_struct(ind).line_color;
+                %        udf.chan_marks_struct(mark_ind).tag_color=udf.chan_marks_struct(ind).tag_color;
+                %        udf.chan_marks_struct(mark_ind).order=udf.chan_marks_struct(ind).order;
+                %end
+                %udf.chan_marks_struct(mark_ind).flags=zeros(size(udf.chan_marks_struct(1).flags));
             end
             results = {0 '' 1 1 ...
                        mark_ind ...
-                       {g.eloc_file(g.eventedit.ChanIndex).labels}};
+                       {udf.eloc_file(g.eventedit.ChanIndex).labels}};
         else            
             
             % pop up window
@@ -134,7 +139,7 @@ if nargin < 5
                 ...6
                 {'Style', 'checkbox', 'tag', 'MarkBadChanCheck', 'string', 'Toggle channel marks status:', 'value', 0, ...
                 'callback', 'set(findobj(''tag'', ''EditEventCheck''), ''value'', 0);' }, ...
-                {'Style','popup','string',{g.chan_marks_struct.label},'value',1}, ...
+                {'Style','popup','string',{udf.chan_marks_struct.label},'value',1}, ...
                 ...7
                 {'Style', 'text', 'string', 'Channels selection:' }, ...
                 {'Style', 'pushbutton', 'string', '...', 'tag', 'ChanLabelButton',...
@@ -142,9 +147,9 @@ if nargin < 5
                 'set(findobj(gcbf, ''tag'', ''ChanLabelEdit''), ''string'', vararg2str(ChanLabelCell)); clear tmpchan ChanLabelIndex,ChanLabelStr,ChanLabelCell;']}, ...
                 {}, ...
                 ...8
-                {'Style', 'edit', 'string', {g.eloc_file(g.eventedit.ChanIndex).labels} ,'tag', 'ChanLabelEdit'}, ...
+                {'Style', 'edit', 'string', {udf.eloc_file(g.eventedit.ChanIndex).labels} ,'tag', 'ChanLabelEdit'}, ...
                 }, ...
-                'pophelp(''pop_fig_EditEvent'');', 'event edit -- pop_fig_EditEvent()', g.eloc_file);%, [], 'return');
+                'pophelp(''pop_fig_EditEvent'');', 'event edit -- pop_fig_EditEvent()', udf.eloc_file);%, [], 'return');
             %close;
             if isempty(results);return;end
             
@@ -172,7 +177,7 @@ if nargin < 5
         
         % toggle bad channel
         if results{4}==1
-            g.quick_chanflag=g.chan_marks_struct(results{5}).label;
+            g.quick_chanflag=udf.chan_marks_struct(results{5}).label;
             %if ~isfield(g.eloc_file, 'badchan');
             %    for i=1:length(g.eloc_file);
             %        g.eloc_file(i).badchan=0;
@@ -185,22 +190,22 @@ if nargin < 5
             %    g.eventedit.ChanLabelCell=eval(['{' ChanLabelStr '}']);
             %end
             for i=1:length(g.eventedit.ChanLabelCell);
-                g.eventedit.ChanIndex=strmatch(g.eventedit.ChanLabelCell{i},{g.eloc_file.labels},'exact');
+                g.eventedit.ChanIndex=strmatch(g.eventedit.ChanLabelCell{i},{udf.eloc_file.labels},'exact');
                 %if g.eloc_file(g.eventedit.ChanIndex).badchan==0;
                 %    g.eloc_file(g.eventedit.ChanIndex).badchan=1;
                 %else
                 %    g.eloc_file(g.eventedit.ChanIndex).badchan=0;
                 %end
-                mark_ind=find(strcmp(g.quick_chanflag,{g.chan_marks_struct.label}));
-                if g.chan_marks_struct(mark_ind).flags(g.eventedit.ChanIndex)==0;
-                    g.chan_marks_struct(mark_ind).flags(g.eventedit.ChanIndex)=1;
+                mark_ind=find(strcmp(g.quick_chanflag,{udf.chan_marks_struct.label}));
+                if udf.chan_marks_struct(mark_ind).flags(g.eventedit.ChanIndex)==0;
+                    udf.chan_marks_struct(mark_ind).flags(g.eventedit.ChanIndex)=1;
                 else
-                    g.chan_marks_struct(mark_ind).flags(g.eventedit.ChanIndex)=0;
+                    udf.chan_marks_struct(mark_ind).flags(g.eventedit.ChanIndex)=0;
                 end
             end
             g = rmfield(g, 'eventedit');
             %set(gcbf, 'UserData', g);            
-            set(findobj('tag', g.tag), 'UserData', g);
+            set(findobj('tag', udf.tag), 'UserData',udf);
             ve_eegplot('drawp',0);
             return
         end
@@ -295,41 +300,41 @@ switch Proc; %if strcmp(Proc, 'New');
     
     case 'New'
         
-        if ~isfield(g, 'newindex');
-            g.newindex=g.nevents+1;
-        else
-            g.newindex=g.newindex+1;
-        end
+        %if ~isfield(g, 'newindex');
+            g.newindex=length(udf.events)+1;
+        %else
+        %    g.newindex=g.newindex+1;
+        %end
         
         % Create new event.
-        if isempty(g.events);
-            g.events(1).latency=Latency;
+        if isempty(udf.events);
+            udf.events(1).latency=Latency;
         else
-            g.events(length(g.events)+1).latency=Latency;
+            udf.events(length(udf.events)+1).latency=Latency;
         end
         
-        g.events(length(g.events)).type=EventType;
-        g.events(length(g.events)).chan=EventChan;
-        g.events(length(g.events)).urevent=length(g.events);
-        g.events(length(g.events)).proc='new';
-        g.events(length(g.events)).index=g.newindex;
-        if length(g.datasize)==3;
-            g.events(length(g.events)).epoch=ceil(Latency/g.datasize(3));
+        udf.events(length(udf.events)).type=EventType;
+        udf.events(length(udf.events)).chan=EventChan;
+        udf.events(length(udf.events)).urevent=length(udf.events);
+        udf.events(length(udf.events)).proc='new';
+        udf.events(length(udf.events)).index=g.newindex;
+        if length(size(uda,3))==3;
+            udf.events(length(udf.events)).epoch=ceil(Latency/size(uda,3));
         end
         
-        if ~isfield(g, 'eventupdate');
+        if ~isfield(udf, 'eventupdate');
             updateindex=1;
         else
-            updateindex=length(g.eventupdate)+1;
+            updateindex=length(udf.eventupdate)+1;
         end
         
-        g.eventupdate(updateindex).latency=Latency;
-        g.eventupdate(updateindex).type=EventType;
-        g.eventupdate(updateindex).chan=EventChan;
-        g.eventupdate(updateindex).proc='new';
-        g.eventupdate(updateindex).index=g.newindex;
-        if length(g.datasize)==3;
-            g.eventupdate(updateindex).epoch=ceil(Latency/g.datasize(3));
+        udf.eventupdate(updateindex).latency=Latency;
+        udf.eventupdate(updateindex).type=EventType;
+        udf.eventupdate(updateindex).chan=EventChan;
+        udf.eventupdate(updateindex).proc='new';
+        udf.eventupdate(updateindex).index=g.newindex;
+        if length(size(uda,3))==3;
+            udf.eventupdate(updateindex).epoch=ceil(Latency/size(uda,3));
         end
         
         
@@ -342,16 +347,16 @@ switch Proc; %if strcmp(Proc, 'New');
         if ~isfield(g, 'eventupdate');
             updateindex=1;
         else
-            updateindex=length(g.eventupdate)+1;
+            updateindex=length(udf.eventupdate)+1;
         end
         
-        g.eventupdate(updateindex).latency=[];
-        g.eventupdate(updateindex).type=[];
-        g.eventupdate(updateindex).proc='clear';
-        g.eventupdate(updateindex).index=g.events(EventIndex).index;
+        udf.eventupdate(updateindex).latency=[];
+        udf.eventupdate(updateindex).type=[];
+        udf.eventupdate(updateindex).proc='clear';
+        udf.eventupdate(updateindex).index=udf.events(EventIndex).index;
         
         % Clear SelEvent.
-        g.events(EventIndex)=[];
+        udf.events(EventIndex)=[];
         
         %end
         
@@ -462,46 +467,46 @@ end
 
 
 % Create new eventtypes parameters if necessary.
-if isfield(g, 'eventtypes');
-    if ~any(strcmp(EventType, g.eventtypes));
-        eventtypesN=length(g.eventtypes)+1;
-        g.eventtypes{eventtypesN} = EventType;
-        g.eventtypecolors{eventtypesN} = 'k';
-        g.eventtypestyle{eventtypesN} = '-';
-        g.eventtypewidths(eventtypesN) = 1;
+if isfield(udf, 'eventtypes');
+    if ~any(strcmp(EventType, udf.eventtypes));
+        eventtypesN=length(udf.eventtypes)+1;
+        udf.eventtypes{eventtypesN} = EventType;
+        udf.eventtypecolors{eventtypesN} = 'k';
+        udf.eventtypestyle{eventtypesN} = '-';
+        udf.eventtypewidths(eventtypesN) = 1;
     end
 else
     eventtypesN=1;
-    g.eventtypes{eventtypesN} = EventType;
-    g.eventtypecolors{eventtypesN} = 'k';
-    g.eventtypestyle{eventtypesN} = '-';
-    g.eventtypewidths(eventtypesN) = 1;
-    g.plotevent='on';
+    udf.eventtypes{eventtypesN} = EventType;
+    udf.eventtypecolors{eventtypesN} = 'k';
+    udf.eventtypestyle{eventtypesN} = '-';
+    udf.eventtypewidths(eventtypesN) = 1;
+    udf.plotevent='on';
 end
 % Clear remaining display parameters.
-if isfield(g, 'eventcolors');
+if isfield(udf, 'eventcolors');
     fields={'eventcolors', 'eventstyle', 'eventwidths', 'eventlatencies', 'eventlatencyend'};
-    g=rmfield(g,fields);
+    udf=rmfield(udf,fields);
 end
 
-if isempty(g.events);
-    g.eventcolors=[];
-    g.eventstyle=[];
-    g.eventwidths=[];
-    g.eventlatencies=[];
-    g.eventlatencyend=[];
+if isempty(udf.events);
+    udf.eventcolors=[];
+    udf.eventstyle=[];
+    udf.eventwidths=[];
+    udf.eventlatencies=[];
+    udf.eventlatencyend=[];
 else
-    for i=1:length(g.events);
-        eventtypeindex=find(strcmp(g.eventtypes,g.events(i).type));
-        g.eventcolors{i}=g.eventtypecolors{eventtypeindex};
-        g.eventstyle{i}=g.eventtypestyle{eventtypeindex};
-        g.eventwidths(i)=g.eventtypewidths(eventtypeindex);
-        g.eventlatencies(i)=g.events(i).latency;
-        g.eventlatencyend(i)=g.events(i).latency+g.eventwidths(i);
+    for i=1:length(udf.events);
+        eventtypeindex=find(strcmp(udf.eventtypes,udf.events(i).type));
+        udf.eventcolors{i}=udf.eventtypecolors{eventtypeindex};
+        udf.eventstyle{i}=udf.eventtypestyle{eventtypeindex};
+        udf.eventwidths(i)=udf.eventtypewidths(eventtypeindex);
+        udf.eventlatencies(i)=udf.events(i).latency;
+        udf.eventlatencyend(i)=udf.events(i).latency+udf.eventwidths(i);
     end
 end
 
-g = rmfield(g, 'eventedit');
+g=rmfield(g,'eventedit');
 
-set(gcf, 'UserData', g);
-ve_eegplot('drawp', 0);
+set(gcf,'UserData',udf);
+ve_eegplot('drawp',0);

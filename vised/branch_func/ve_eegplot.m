@@ -276,6 +276,7 @@ if ~isstr(data) % If NOT a 'noui' call or a callback from uicontrols
    try, g.events; 		    catch, g.events      = []; end;
    try, g.ploteventdur;     catch, g.ploteventdur = 'off'; end;
    try, g.data2;            catch, g.data2      = []; end;
+   if ischar(g.data2);g.data2=evalin('base',g.data2);end;
    try, g.plotdata2;        catch, g.plotdata2 = 'off'; end;
    try, g.mocap;		    catch, g.mocap		= 'off'; end; % nima
    try, g.selectcommand;    catch, g.selectcommand     = { defdowncom defmotioncom defupcom }; end;
@@ -682,9 +683,9 @@ u(22) = uicontrol('Parent',figh, ...
   end;
   acceptcommand = [ 'g = get(gcbf, ''userdata'');' ... 
 				    'TMPREJ = g.winrej;' ...
+		  				  tmpcom ...
                     'if g.children, delete(g.children); end;' ...
                     'delete(gcbf);' ...
-		  				  tmpcom ...
                     '; clear g;']; % quitting expression
   if ~isempty(g.command)
 	  u(12) = uicontrol('Parent',figh, ...
@@ -1196,12 +1197,14 @@ else
         end
     end
     
-    inter_time_mark_offset=figdim(4)*g.inter_mark_int;
-    time_marks_offset=figdim(4)*g.marks_y_loc;
+    ylims=get(gca,'YLim');
+    inter_time_mark_offset=diff(ylims)*g.inter_mark_int;
+    %inter_time_mark_offset=figdim(4)*g.inter_mark_int;
+    time_marks_offset=diff(ylims)*g.marks_y_loc;
+    %time_marks_offset=figdim(4)*g.marks_y_loc;
     
     % plot time_info flags.
-    cmap=[];
-    
+    cmap=[];  
     j=0;
     %for ntf=1:length(time_marks_offset);
     for tmi=1:length(g.time_marks_struct);
@@ -1221,12 +1224,14 @@ else
         
         for i=1:length(time_marks_offset)
             sh=surf(1:size(cflags,2), ...
-                [inter_time_mark_offset*tmi+(time_marks_offset(i))-(inter_time_mark_offset*length(g.time_marks_struct)), ...
-                inter_time_mark_offset*tmi+(time_marks_offset(i))+inter_time_mark_offset-(inter_time_mark_offset*length(g.time_marks_struct))], ...
+                [ylims(1)+inter_time_mark_offset*tmi+(time_marks_offset(i))-(inter_time_mark_offset*length(g.time_marks_struct)), ...
+                ylims(1)+inter_time_mark_offset*tmi+(time_marks_offset(i))+inter_time_mark_offset-(inter_time_mark_offset*length(g.time_marks_struct))], ...
                 cflags, ...
                 'CData',cdat, ...
                 'LineStyle','none');
             alpha(sh,g.marks_col_alpha);
+            text(figdim(2),ylims(1)+inter_time_mark_offset*tmi+(time_marks_offset(i))-(inter_time_mark_offset*length(g.time_marks_struct)), ...
+                g.time_marks_struct(tmi).label,'color',g.time_marks_struct(tmi).color,'interpreter','none');
         end
     end
     colormap(cmap); 

@@ -168,7 +168,7 @@ try vised_config.trialstag = g.trialstag;                 catch,end
 try vised_config.winrej = g.winrej;                       catch,end
 
 try vised_config.command = g.command;
-catch,if isempty(vised_config.command);vised_config.command='EEG=ve_update(EEG, g); EEG.saved = ''no'';';end
+catch,if isempty(vised_config.command);vised_config.command='EEG=ve_update(EEG);EEG.saved = ''no'';';end
 end
 
 try vised_config.tag = g.tag;                             catch,end
@@ -210,18 +210,18 @@ end
 
 try vised_config.extselectcommand=g.extselectcommand;     catch 
         if isempty(vised_config.extselectcommand{1})
-            vised_config.extselectcommand={ ['EEG=ve_edit(EEG);'] 've_eegplot(''defmotioncom'', gcbf);' '' };
+            vised_config.extselectcommand={ ['ve_edit;'] 've_eegplot(''defmotioncom'', gcbf);' '' };
         end
 end
 try vised_config.altselectcommand=g.altselectcommand;     catch 
         if isempty(vised_config.altselectcommand{1})
-            vised_config.altselectcommand={ ['EEG=ve_edit(EEG,''quick_chanflag'',''manual'');'] 've_eegplot(''defmotioncom'', gcbf);' '' };
+            vised_config.altselectcommand={ ['ve_edit(''quick_chanflag'',''manual'');'] 've_eegplot(''defmotioncom'', gcbf);' '' };
         end
 end
         
 try vised_config.keyselectcommand=g.keyselectcommand;      catch
         if isempty(vised_config.keyselectcommand{1})
-            vised_config.keyselectcommand={'t,ve_eegplot(''topoplot'',gcbf)'};
+            vised_config.keyselectcommand={'t,ve_eegplot(''topoplot'',gcbf)';'r,ve_eegplot(''drawp'',0)'};
         end
 end
     
@@ -517,22 +517,22 @@ end
 
 %% PREPARE VARIABLES FOR EEGPLOT ...
 rejeegplot=[];
-if EEG.trials > 1
-    %rejE=zeros(EEG.nbchan,EEG.trials);
-    %rej=marks_label2index(vised_config.time_marks_struct,vised_config.winrej_marks_labels,'indexes');
-    %rejeegplot=trial2eegplot(rej,rejE,EEG.pnts,vised_config.wincolor);
-    j=0;
-    for i=1:EEG.trials;
-        if any(EEG.marks.time_info(1).flags(1,:,i));
-            j=j+1;
-            rejeegplot(j,1)=(EEG.pnts*i)-(EEG.pnts-1);
-            rejeegplot(j,2)=(EEG.pnts*i);
-            rejeegplot(j,3:5)=vised_config.wincolor;
-            rejeegplot(j,6:EEG.nbchan+5)=zeros(1,EEG.nbchan);
+if ~isempty(vised_config.winrej_marks_labels)
+    if EEG.trials > 1
+        flags=marks_label2index(vised_config.time_marks_struct,vised_config.winrej_marks_labels,'flags');
+        j=0;
+        for i=1:EEG.trials;
+            if any(flags(i));
+                j=j+1;
+                rejeegplot(j,1)=(EEG.pnts*i)-(EEG.pnts-1);
+                rejeegplot(j,2)=(EEG.pnts*i);
+                rejeegplot(j,3:5)=vised_config.wincolor;
+                rejeegplot(j,6:EEG.nbchan+5)=zeros(1,EEG.nbchan);
+            end
         end
+    else
+        rejeegplot=marks_label2index(vised_config.time_marks_struct,vised_config.winrej_marks_labels,'bounds');
     end
-else
-    rejeegplot=marks_label2index(vised_config.time_marks_struct,vised_config.winrej_marks_labels,'bounds');
 end
 vised_config.winrej=rejeegplot;
 

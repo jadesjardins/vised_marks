@@ -35,7 +35,7 @@ classdef visedconfig_obj
         xgrid='off'
         ygrid='off'
         ploteventdur='off'
-        data2=[]
+        data2=''
         command=''
         butlabel=''
         winrej=[]

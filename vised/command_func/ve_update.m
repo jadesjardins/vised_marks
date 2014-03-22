@@ -1,23 +1,25 @@
-function EEG = ve_update(EEG, g)
+function EEG = ve_update(EEG)
 
-if isfield(g, 'eventupdate');
-    for i=1:length(g.eventupdate);
-        if strcmp(g.eventupdate(i).proc, 'new');
+udf=get(gcbf,'userdata');
+
+if isfield(udf, 'eventupdate');
+    for i=1:length(udf.eventupdate);
+        if strcmp(udf.eventupdate(i).proc, 'new');
             eventindex=length(EEG.event)+1;
-            EEG.event(eventindex).latency=g.eventupdate(i).latency;
-            EEG.event(eventindex).type=g.eventupdate(i).type;
+            EEG.event(eventindex).latency=udf.eventupdate(i).latency;
+            EEG.event(eventindex).type=udf.eventupdate(i).type;
             if ndims(EEG.data)==3;
-                EEG.event(eventindex).epoch=g.eventupdate(i).epoch;
+                EEG.event(eventindex).epoch=udf.eventupdate(i).epoch;
             end
         end
-        if strcmp(g.eventupdate(i).proc, 'clear');
-            eventindex=g.eventupdate(i).index;
+        if strcmp(udf.eventupdate(i).proc, 'clear');
+            eventindex=udf.eventupdate(i).index;
             EEG.event(eventindex).action='clear';
         end
-        if strcmp(g.eventupdate(i).proc, 'edit');
-            eventindex=g.eventupdate(i).index;
+        if strcmp(udf.eventupdate(i).proc, 'edit');
+            eventindex=udf.eventupdate(i).index;
             EEG.event(eventindex).action='edit';
-            EEG.event(eventindex).actlat=g.eventupdate(i).latency;
+            EEG.event(eventindex).actlat=udf.eventupdate(i).latency;
         end
     end
 end
@@ -64,43 +66,43 @@ EEG.event=TMP.event;
 EEG=eeg_checkset(EEG, 'eventconsistency');
 
 %% HANDLE MANUAL SELECTION OF TIME PERIODS. UPDATE "manual" time_info... 
-manual_ind=find(strcmp('manual',{EEG.marks.time_info.label}));
-if isempty(manual_ind);
-    disp('There is no "manual" flag in the marks.time_info structure... creating it...');
-    n_time_marks=length(EEG.marks.time_info);
-    manual_ind=n_time_marks+1;
-    EEG.marks.time_info(manual_ind).label='manual';
-    EEG.marks.time_info(manual_ind).color=[.5,.5,.5];
-    EEG.marks.time_info(manual_ind).flags=zeros(size(EEG.data(1,:,:)));
-else
-    disp('Replacing existing "manual" flags...');
-    EEG.marks.time_info(manual_ind).flags=zeros(size(EEG.data(1,:,:)));
-end
+%manual_ind=find(strcmp('manual',{EEG.marks.time_info.label}));
+%if isempty(manual_ind);
+%    disp('There is no "manual" flag in the marks.time_info structure... creating it...');
+%    n_time_marks=length(EEG.marks.time_info);
+%    manual_ind=n_time_marks+1;
+%    EEG.marks.time_info(manual_ind).label='manual';
+%    EEG.marks.time_info(manual_ind).color=[.5,.5,.5];
+%    EEG.marks.time_info(manual_ind).flags=zeros(size(EEG.data(1,:,:)));
+%else
+%    disp('Replacing existing "manual" flags...');
+%    EEG.marks.time_info(manual_ind).flags=zeros(size(EEG.data(1,:,:)));
+%end
 
-for i=1:size(g.winrej,1);
-    if ndims(EEG.marks.time_info(manual_ind).flags)==2;
-        EEG.marks.time_info(manual_ind).flags(round(g.winrej(i,1)):round(g.winrej(i,2)))=1;
-    else
-        EEG.marks.time_info(manual_ind).flags(1,:,round(g.winrej(i,2)/EEG.pnts))=1;
-    end
-end
-    
+%for i=1:size(g.winrej,1);
+%    if ndims(EEG.marks.time_info(manual_ind).flags)==2;
+%        EEG.marks.time_info(manual_ind).flags(round(g.winrej(i,1)):round(g.winrej(i,2)))=1;
+%    else
+%        EEG.marks.time_info(manual_ind).flags(1,:,round(g.winrej(i,2)/EEG.pnts))=1;
+%    end
+%end
+EEG.marks.time_info=udf.time_marks_struct;    
 %% HANDLE MANUAL SELECTION OF CHANNELS. UPDATE "manual" chan_info... 
-switch g.data_type
+switch udf.data_type
     case 'EEG'
         for ml_i=1:length(EEG.marks.chan_info)
             manual_ind_marks=ml_i;%find(strcmp(EEG.marks.chan_info{i}.label,{EEG.marks.chan_info.label}));
-            manual_ind_g=find(strcmp(EEG.marks.chan_info(ml_i).label,{g.chan_marks_struct.label}));
-            for i=1:length(g.eloc_file);
-                EEG.marks.chan_info(manual_ind_marks).flags(g.eloc_file(i).index,1)=g.chan_marks_struct(manual_ind_g).flags(i,1);
+            manual_ind_g=find(strcmp(EEG.marks.chan_info(ml_i).label,{udf.chan_marks_struct.label}));
+            for i=1:length(udf.eloc_file);
+                EEG.marks.chan_info(manual_ind_marks).flags(udf.eloc_file(i).index,1)=udf.chan_marks_struct(manual_ind_g).flags(i,1);
             end
         end
     case 'ICA'
         for ml_i=1:length(EEG.marks.comp_info)
             manual_ind_marks=ml_i;%find(strcmp('manual',{EEG.marks.comp_info.label}));
-            manual_ind_g=find(strcmp(EEG.marks.comp_info(ml_i).label,{g.chan_marks_struct.label}));
-            for i=1:length(g.eloc_file);
-                EEG.marks.comp_info(manual_ind_marks).flags(g.eloc_file(i).index,1)=g.chan_marks_struct(manual_ind_g).flags(i,1);
+            manual_ind_g=find(strcmp(EEG.marks.comp_info(ml_i).label,{udf.chan_marks_struct.label}));
+            for i=1:length(udf.eloc_file);
+                EEG.marks.comp_info(manual_ind_marks).flags(udf.eloc_file(i).index,1)=udf.chan_marks_struct(manual_ind_g).flags(i,1);
             end
         end        
 end
@@ -118,9 +120,9 @@ eeglab redraw
 %EEG.winrej=[];
 %EEG.winrej=g.winrej;
 %% OBSOLETE ... HANDLE BADCHAN FIELD OF ELOC_FILE STRUCTURE ...        
-if isfield(g,'eloc_file');
-    if length(g.eloc_file(1).labels)>=4;
-        if strmatch(g.eloc_file(1).labels(1:4),'comp');
+if isfield(udf,'eloc_file');
+    if length(udf.eloc_file(1).labels)>=4;
+        if strmatch(udf.eloc_file(1).labels(1:4),'comp');
             datoric=2;
         end
     end
@@ -129,15 +131,15 @@ if ~exist('datoric', 'var');
     datoric=1;
 end
 
-if isfield(g.eloc_file, 'badchan');
+if isfield(udf.eloc_file, 'badchan');
     switch datoric
         case 1
-            for i=1:length(g.eloc_file);
-                EEG.chanlocs(g.eloc_file(i).index).badchan=g.eloc_file(i).badchan;
+            for i=1:length(udf.eloc_file);
+                EEG.chanlocs(udf.eloc_file(i).index).badchan=udf.eloc_file(i).badchan;
             end
         case 2
-            for i=1:length(g.eloc_file);
-                EEG.reject.gcompreject(g.eloc_file(i).index)=g.eloc_file(i).badchan;
+            for i=1:length(udf.eloc_file);
+                EEG.reject.gcompreject(udf.eloc_file(i).index)=udf.eloc_file(i).badchan;
             end
     end
 end
