@@ -1,4 +1,4 @@
-function [EEG,com]=pop_marks_add_label(EEG,varargin)
+function [marks_struct,com]=pop_marks_add_label(marks_struct,varargin)
 
 com = ''; % this initialization ensure that the function will return something
           % if the user press the cancel button            
@@ -12,6 +12,29 @@ if nargin < 1
 end;	
 
 g=struct(varargin{:});
+
+try g.datasize;
+catch
+    if isempty(marks_struct)
+        disp('not enough information to add marks');
+    else
+        if isfield(marks_struct,'time_info');
+            %ntime=size(marks_struct.time_info(1).flags);
+            g.datasize=size(marks_struct.time_info(1).flags);
+        end
+        if isfield(marks_struct,'chan_info');
+            g.datasize(1)=length(marks_struct.chan_info(1).flags);
+        end
+        if isfield(marks_struct,'comp_info');
+            g.ncomps=length(marks_struct.comp_info(1).flags);
+        end
+        
+%        g.datasize=[length(marks_struct.chan_info(1).flags),size(marks_struct.time_info(1).flags(2,3))];
+    end
+end
+if length(g.datasize)==2;g.datasize(3)=1;end
+
+try g.ncomps,    catch; g.ncomps=[];end
 
 try g.action; catch; g.action='add';end
 action_cell={'add','remove','clear'};
@@ -39,15 +62,15 @@ catch;
         case 'time_info'
             g.color = [];
             color_enable='on';
-            label_cell={EEG.marks.time_info.label};
+            label_cell={marks_struct.time_info.label};
         case 'chan_info'
             g.color = [];
             color_enable='off';
-            label_cell={EEG.marks.chan_info.label};
+            label_cell={marks_struct.chan_info.label};
         case 'comp_info'
             g.color = [];
             color_enable='off';
-            label_cell={EEG.marks.comp_info.label};
+            label_cell={marks_struct.comp_info.label};
     end
 end
 
@@ -95,7 +118,9 @@ switch g.info_type
     case 'comp_info'
         info_type_val = 3;
 end
-   
+
+
+
 info_type_cell={'time_info','chan_info','comp_info'};
 % pop up window
 % -------------
@@ -162,13 +187,13 @@ results=inputgui( ...
     {'Style','pushbutton','string','...','tag','push_label', ...
     'callback',['switch get(findobj(gcbf,''tag'',''pop_it''),''value'');', ...
                 '    case 1;', ...
-                '        [label_ind,label_str,label_cell]=pop_chansel({EEG.marks.time_info.label});', ...
+                '        [label_ind,label_str,label_cell]=pop_chansel({marks_struct.time_info.label});', ...
                 '        set(findobj(gcbf, ''tag'', ''edt_label''), ''string'', vararg2str(label_cell));', ...
                 '    case 2;', ...
-                '        [label_ind,label_str,label_cell]=pop_chansel({EEG.marks.chan_info.label});', ...
+                '        [label_ind,label_str,label_cell]=pop_chansel({marks_struct.chan_info.label});', ...
                 '        set(findobj(gcbf, ''tag'', ''edt_label''), ''string'', vararg2str(label_cell));', ...
                 '    case 3;', ...
-                '        [label_ind,label_str,label_cell]=pop_chansel({EEG.marks.comp_info.label});', ...
+                '        [label_ind,label_str,label_cell]=pop_chansel({marks_struct.comp_info.label});', ...
                 '        set(findobj(gcbf, ''tag'', ''edt_label''), ''string'', vararg2str(label_cell));', ...
                 'end;']}, ...
     ...
@@ -233,28 +258,29 @@ switch action%action
                 info_type='time_info';
                 marks_prop{1}=results{3};
                 marks_prop{2}=str2num(results{4});
-                marks_prop{3}=zeros(1,EEG.pnts);
+                marks_prop{3}=zeros(1,g.datasize(1,:,:));
             case 2
                 info_type='chan_info';
                 marks_prop{1}=results{3};
                 marks_prop{2}=str2num(results{5});
                 marks_prop{3}=str2num(results{6});
                 marks_prop{4}=str2num(results{7});
-                marks_prop{5}=zeros(EEG.nbchan,1);
+                marks_prop{5}=zeros(g.datasize(1),1);
             case 3
                 info_type='comp_info';
                 marks_prop{1}=results{3};
                 marks_prop{2}=str2num(results{5});
                 marks_prop{3}=str2num(results{6});
                 marks_prop{4}=str2num(results{7});
-                marks_prop{5}=zeros(min(size(EEG.icaweights)),1);
+                marks_prop{5}=zeros(g.ncomps,1);
         end
         
-        if ~isfield(EEG,'marks');
-            EEG=marks_init(EEG);
+        if isempty(marks_struct)
+        %if ~isfield(EEG,'marks');
+            marks_struct=marks_init(marks_struct,g.datasize,g.ncomps);
         end
         
-        EEG = marks_add_label(EEG,info_type, marks_prop);
+        marks_struct=marks_add_label(marks_struct,info_type, marks_prop);
         
     case {'delete','clear'}
         info_type=info_type_cell{results{3}};
@@ -266,14 +292,14 @@ switch action%action
         
         for i=1:length(flag_label);
             clear labelind;
-            eval(['label_ind=find(strcmp(''',flag_label{i},''',{EEG.marks.',info_type,'.label}))']);
+            eval(['label_ind=find(strcmp(''',flag_label{i},''',{marks_struct.',info_type,'.label}))']);
             if ~isempty(label_ind);
                 if strcmp(action,'delete');
                     disp(['Deleting ''',flag_label{i},''' flag type...']);
-                    eval(['EEG.marks.',info_type,'(',num2str(label_ind),')=[];']);
+                    eval(['marks_struct.',info_type,'(',num2str(label_ind),')=[];']);
                 else
                     disp(['Clearing ''',flag_label{i},''' flag type...']);
-                    eval(['EEG.marks.',info_type,'(',num2str(label_ind),').flags)=zeros(size(EEG.marks.',info_type,'(',num2str(label_ind),').flags));']);
+                    eval(['marks_struct.',info_type,'(',num2str(label_ind),').flags)=zeros(size(marks_struct.',info_type,'(',num2str(label_ind),').flags));']);
                 end
             end
         end

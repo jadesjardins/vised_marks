@@ -3,14 +3,14 @@ function [critrow,critcol,rowind,colind]=values2flags(EEG,inmeasure,flagdir,flag
 g=struct(varargin{:});
 
 try g.trim; catch, g.trim=0; end;
-try g.plotfigs; catch, g.plotfigs='off';end;
+try g.plot_figs; catch, g.plot_figs='off';end;
 
 critrow=[];
 critcol=[];
 rowind=[];
 colind=[];
 
-if strcmp(g.plotfigs,'on')
+if strcmp(g.plot_figs,'on')
     figure;
     subplot(3,3,[2,3,5,6]);surf(double(inmeasure),'LineStyle','none');
     axis('tight');
@@ -29,7 +29,7 @@ if ~isempty(chan_win_sd);
     s_chan_win_sd=std(chan_win_sd,[],2);
     s_thresh=m_chan_win_sd-s_chan_win_sd*1;
     
-    if strcmp(g.plotfigs,'on')
+    if strcmp(g.plot_figs,'on')
         figure;plot(s_thresh);
         figure;
         subplot(3,3,[2,3,5,6]);surf(double(chan_win_sd),'LineStyle','none');
@@ -52,11 +52,11 @@ if flagdir==1||flagdir==3;
     critrow=zeros(size(inmeasure));
     colind=1:size(inmeasure,2);
     nCol=length(colind);
-    if strcmp(g.plotfigs,'on')
+    if strcmp(g.plot_figs,'on')
         hrowc = waitbar(0,['Testing column 0 of ', num2str(nCol), '...']);
     end
     for coli=colind;
-        if strcmp(g.plotfigs,'on')
+        if strcmp(g.plot_figs,'on')
             waitbar(coli/nCol,hrowc, ...
                 ['Testing column ', num2str(coli), ' of ', num2str(nCol), '...']);
         end
@@ -92,7 +92,7 @@ if flagdir==1||flagdir==3;
         end
     end
     
-    if strcmp(g.plotfigs,'on')
+    if strcmp(g.plot_figs,'on')
         close(hrowc);
     end
     
@@ -113,7 +113,7 @@ if flagdir==1||flagdir==3;
     mrcritrow=mean(colcritrow);
     srcritrow=std(colcritrow);
     
-    if strcmp(g.plotfigs,'on')
+    if strcmp(g.plot_figs,'on')
         figure;
         subplot(3,3,[2,3,5,6]);surf(critrow,'LineStyle','none');
         axis('tight');
@@ -137,12 +137,12 @@ if flagdir==2||flagdir==3;
     rowind=1:size(inmeasure,1);
     nRow=length(rowind);
     
-    if strcmp(g.plotfigs,'on')
+    if strcmp(g.plot_figs,'on')
         hcolc = waitbar(0,['Testing row 0 of ', nRow, '...']);
     end
     
     for rowi=rowind;
-        if strcmp(g.plotfigs,'on')
+        if strcmp(g.plot_figs,'on')
             waitbar(0,hcolc, ...
                 ['Testing row ', num2str(rowi), ' of ', num2str(nRow), '...']);
         end
@@ -173,7 +173,7 @@ if flagdir==2||flagdir==3;
         end
     end
 
-    if strcmp(g.plotfigs,'on')
+    if strcmp(g.plot_figs,'on')
         close(hcolc);
     end
 
@@ -194,7 +194,7 @@ if flagdir==2||flagdir==3;
     
     colind=find(colcritcol>colthresh);
     
-    if strcmp(g.plotfigs,'on')
+    if strcmp(g.plot_figs,'on')
         figure;
         subplot(3,3,[2,3,5,6]);surf(critcol,'LineStyle','none');
         axis('tight');

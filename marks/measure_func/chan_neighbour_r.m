@@ -2,12 +2,12 @@ function [EEG,m_neigbr_r,chandist,y,chan_win_sd]=chan_neighbour_r(EEG,nneigbr,me
 
 g=struct(varargin{:});
 
-try g.chinds;    catch, g.chinds=1:EEG.nbchan; end;
-try g.latinds;   catch, g.latinds=1:EEG.pnts; end;
-try g.plotfigs;  catch, g.plotfigs='off'; end;
+try g.chan_inds;    catch, g.chan_inds=1:EEG.nbchan; end;
+try g.epoch_inds;   catch, g.epoch_inds=1:EEG.pnts; end;
+try g.plot_figs;    catch, g.plot_figs='off'; end;
 
-tmp.chanlocs = EEG.chanlocs(g.chinds);
-tmp.data     = EEG.data(g.chinds,:,g.latinds);
+tmp.chanlocs = EEG.chanlocs(g.chan_inds);
+tmp.data     = EEG.data(g.chan_inds,:,g.epoch_inds);
 
 nchan=size(tmp.data,1);
 ntrial=size(tmp.data,3);
@@ -32,11 +32,11 @@ chandist=sum(abs(chandist),3);
 
 c_neigbr_r=zeros(nchan,ntrial,nneigbr);
 
-if strcmp(g.plotfigs,'on')
+if strcmp(g.plot_figs,'on')
     hchanr = waitbar(0,['Calculating nearest reighbour r for channel 0 of ', num2str(nchan), '...']);
 end
 for i=1:nchan;
-    if strcmp(g.plotfigs,'on')
+    if strcmp(g.plot_figs,'on')
         waitbar(i/EEG.nbchan,hchanr, ...
             ['Calculating nearest reighbour r for channel ' num2str(i), ' of ', num2str(nchan), '...'])
     end
@@ -54,7 +54,7 @@ for i=1:nchan;
     end
 end
 
-if strcmp(g.plotfigs,'on')
+if strcmp(g.plot_figs,'on')
     close(hchanr);
 end
 switch(method);

@@ -1,7 +1,7 @@
 function EEG=reject2marks(EEG)
 
 if ~isfield(EEG,'marks');
-    EEG=marks_init(EEG);
+    EEG.marks=marks_init();
 end
 
 %CREATE MARKS.TIME_INFO INSTANCES FROM REJECT STRUCTURE FIELDS...
@@ -15,10 +15,10 @@ if ~isempty(find(EEG.reject.rejmanual));
     end
     if find(strcmp('rejmanual',{EEG.marks.time_info.label}));
         disp('''rejmanual'' mark type already exists... replacing it.');
-        EEG=pop_marks_add_label(EEG,'action','remove','info_type','time_info','label','rejmanual');
+        EEG.marks=pop_marks_add_label(EEG.marks,'action','remove','info_type','time_info','label','rejmanual');
         %EEG=marks_removetype(EEG,'time_info','rejmanual');
     end
-    EEG = marks_addtype(EEG,'time_info', ...
+    EEG.marks = marks_add_label(EEG.marks,'time_info', ...
         {'rejmanual',EEG.reject.rejmanualcol,tmpflags});
 end
 
@@ -32,10 +32,10 @@ if ~isempty(find(EEG.reject.rejthresh));
     end
     if find(strcmp('rejthresh',{EEG.marks.time_info.label}));
         disp('''rejthresh'' mark type already exists... replacing it.');
-        EEG=pop_marks_add_label(EEG,'action','remove','info_type','time_info','label','rejthresh');
+        EEG.marks=pop_marks_add_label(EEG.marks,'action','remove','info_type','time_info','label','rejthresh');
         %EEG=marks_removetype(EEG,'time_info','rejthresh');
     end
-    EEG = marks_add_label(EEG,'time_info', ...
+    EEG.marks = marks_add_label(EEG.marks,'time_info', ...
         {'rejthresh',EEG.reject.rejthreshcol,tmpflags});
 end
 
@@ -49,10 +49,10 @@ if ~isempty(find(EEG.reject.rejconst));
     end
     if find(strcmp('rejconst',{EEG.marks.time_info.label}));
         disp('''rejconst'' mark type already exists... replacing it.');
-        EEG=pop_marks_add_label(EEG,'action','remove','info_type','time_info','label','rejconst');
+        EEG.marks=pop_marks_add_label(EEG.marks,'action','remove','info_type','time_info','label','rejconst');
         %EEG=marks_removetype(EEG,'time_info','rejconst');
     end
-    EEG = marks_add_label(EEG,'time_info', ...
+    EEG.marks=marks_add_label(EEG.marks,'time_info', ...
         {'rejconst',EEG.reject.rejconstcol,tmpflags});
 end
 
@@ -66,10 +66,10 @@ if ~isempty(find(EEG.reject.rejjp));
     end
     if find(strcmp('rejjp',{EEG.marks.time_info.label}));
         disp('''rejjp'' mark type already exists... replacing it.');
-        EEG=pop_marks_add_label(EEG,'action','remove','info_type','time_info','label','rejjp');
+        EEG.marks=pop_marks_add_label(EEG.marks,'action','remove','info_type','time_info','label','rejjp');
         %EEG=marks_removetype(EEG,'time_info','rejjp');
     end
-    EEG = marks_add_label(EEG,'time_info', ...
+    EEG.marks=marks_add_label(EEG.marks,'time_info', ...
         {'rejjp',EEG.reject.rejjpcol,tmpflags});
 end
 
@@ -83,10 +83,10 @@ if ~isempty(find(EEG.reject.rejkurt));
     end
     if find(strcmp('rejkurt',{EEG.marks.time_info.label}));
         disp('''rejkurt'' mark type already exists... replacing it.');
-        EEG=pop_marks_add_label(EEG,'action','remove','info_type','time_info','label','rejkurt');
+        EEG.marks=pop_marks_add_label(EEG.marks,'action','remove','info_type','time_info','label','rejkurt');
         %EEG=marks_removetype(EEG,'time_info','rejkurt');
     end
-    EEG = marks_add_label(EEG,'time_info', ...
+    EEG.marks=marks_add_label(EEG.marks,'time_info', ...
         {'rejkurt',EEG.reject.rejkurtcol,tmpflags});
 end
 
@@ -100,9 +100,9 @@ if ~isempty(find(EEG.reject.rejfreq));
     end
     if find(strcmp('rejfreq',{EEG.marks.time_info.label}));
         disp('''rejfreq'' mark type already exists... replacing it.');
-        EEG=pop_marks_add_label(EEG,'action','remove','info_type','time_info','label','rejfreq');
+        EEG.marks=pop_marks_add_label(EEG.marks,'action','remove','info_type','time_info','label','rejfreq');
         %EEG=marks_removetype(EEG,'time_info','rejfreq');
     end
-    EEG = marks_add_label(EEG,'time_info', ...
+    EEG.marks=marks_add_label(EEG.marks,'time_info', ...
         {'rejfreq',EEG.reject.rejfreqcol,tmpflags});
 end

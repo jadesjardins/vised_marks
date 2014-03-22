@@ -124,7 +124,7 @@ end
 
 % create the string command
 % -------------------------
-com = ['EEG = pop_marks_event_gap(EEG,{',vararg2str(event_type),'},',num2str(crit_dur_ms),',''',new_label,''',[',num2str(new_color),']',options,');']
+com = ['EEG = pop_marks_event_gap(EEG,{',vararg2str(event_type),'},',num2str(crit_dur_ms),',''',new_label,''',[',num2str(new_color),']',options,');'];
 
 if isempty(event_type);
     event_type=unique({EEG.event.type});
@@ -144,7 +144,7 @@ flags=[];
 if strcmp(g.interval,'off'); %gap detection...
 
     crit_dur_pnts=ceil(crit_dur_ms/(1000/EEG.srate));
-    crit_dur_pnts=ceil(crit_dur_ms/(1000/EEG.srate))
+    crit_dur_pnts=ceil(crit_dur_ms/(1000/EEG.srate));
     
     j=0;
     for ei=1:length(EEG.event);
@@ -317,8 +317,12 @@ if strcmp(g.invert_flags,'on');
 end
 
 if ~isfield(EEG,'marks');
-    EEG=marks_init(EEG);
+    if isempty(EEG.icaweights)
+        EEG.marks=marks_init(size(EEG.data));
+    else
+        EEG.marks=marks_init(size(EEG.data),'ncomps',min(size(EEG.icaweights)));
+    end
 end
 
-EEG = marks_add_label(EEG,'time_info', ...
+EEG.marks = marks_add_label(EEG.marks,'time_info', ...
 	{new_label,new_color,flags});

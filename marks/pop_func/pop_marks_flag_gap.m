@@ -99,7 +99,7 @@ end
 
 % create the string command
 % -------------------------
-com = ['EEG = pop_marks_flag_gap(EEG,{',vararg2str(mark_label),'},',num2str(crit_dur_ms),',''',new_label,''',[',num2str(new_color),']',options,');']
+com = ['EEG = pop_marks_flag_gap(EEG,{',vararg2str(mark_label),'},',num2str(crit_dur_ms),',''',new_label,''',[',num2str(new_color),']',options,');'];
 
 if isempty(mark_label);
     mark_label={EEG.marks.time_info.label};
@@ -194,5 +194,5 @@ if ~isempty(flagbnd);
     end
 end
 
-EEG = marks_add_label(EEG,'time_info', ...
+EEG.marks=marks_add_label(EEG.marks,'time_info', ...
 	{new_label,new_color,gapflags});
