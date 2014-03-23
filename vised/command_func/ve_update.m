@@ -2,6 +2,10 @@ function EEG = ve_update(EEG)
 
 udf=get(gcbf,'userdata');
 
+if isfield(udf,'urdata');
+    EEG.data=get(findobj('tag','eegaxis','parent',gcbf), 'userdata');
+end
+
 if isfield(udf, 'eventupdate');
     for i=1:length(udf.eventupdate);
         if strcmp(udf.eventupdate(i).proc, 'new');
