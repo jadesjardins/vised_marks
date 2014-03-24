@@ -51,7 +51,11 @@ vised_option_names={'pop_gui','chan_index','event_type','winrej_marks_labels','q
 
 %% initiate marks field if it does not already exist...
 if ~isfield(EEG,'marks');
-    EEG=marks_init(EEG);
+    if isempty(EEG.icaweights)
+        EEG.marks = marks_init(size(EEG.data));
+    else
+        EEG.marks = marks_init(size(EEG.data),zeros(min(size(EEG.icaweights)),1));
+    end
 end
 
 %% INITIATE VARARGIN STRUCTURES...
@@ -89,7 +93,14 @@ catch,
     end
 end
 
-       
+j=0;
+for i=1:length(EEG.event)
+    if isnumeric(EEG.event(i).type)
+        j=j+1;
+        if j==1;disp('at least one event.type is numberic... changing to string...');end;            
+        EEG.event(i).type=num2str(EEG.event(i).type);
+    end
+end
 try vised_config.event_type=g.event_type;
 catch, if isempty(vised_config.event_type);
         if isempty(EEG.event);
