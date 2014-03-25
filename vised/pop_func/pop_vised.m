@@ -54,7 +54,7 @@ if ~isfield(EEG,'marks');
     if isempty(EEG.icaweights)
         EEG.marks = marks_init(size(EEG.data));
     else
-        EEG.marks = marks_init(size(EEG.data),zeros(min(size(EEG.icaweights)),1));
+        EEG.marks = marks_init(size(EEG.data),min(size(EEG.icaweights)));
     end
 end
 
