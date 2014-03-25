@@ -64,7 +64,7 @@ try g.info_type; info_type_enable='off';
 catch;g.info_type = 'time_info';info_type_enable='on';end
 
 try g.label; label_enable='off'; label_but_enable='off';
-catch; g.label = '';label_enable='on';end
+catch; g.label = '';label_enable='on';label_but_enable='on';end
 
 try g.color; color_enable='off';
 catch;
@@ -260,25 +260,32 @@ results=inputgui( ...
     'pophelp(''pop_mark_add_label'');', 'add a new label to the marks structure -- pop_mark_add_label()' ...
     );
 
+if isempty(results);return;end;
+
+label=results{3};
+if strcmp(label(1),'''')&&strcmp(label(end),'''')
+    disp('trimming "''" of the ends of the label...');
+    label=label(2:end-1);
+end
 action=action_cell{results{1}};
 switch action%action
     case 'add'
         switch results{2}%info_type
             case 1
                 info_type='time_info';
-                marks_prop{1}=results{3};
+                marks_prop{1}=label;
                 marks_prop{2}=str2num(results{4});
                 marks_prop{3}=zeros([1,g.datasize([2,3])]);
             case 2
                 info_type='chan_info';
-                marks_prop{1}=results{3};
+                marks_prop{1}=label;
                 marks_prop{2}=str2num(results{5});
                 marks_prop{3}=str2num(results{6});
                 marks_prop{4}=str2num(results{7});
                 marks_prop{5}=zeros(g.datasize(1),1);
             case 3
                 info_type='comp_info';
-                marks_prop{1}=results{3};
+                marks_prop{1}=label;
                 marks_prop{2}=str2num(results{5});
                 marks_prop{3}=str2num(results{6});
                 marks_prop{4}=str2num(results{7});
@@ -293,9 +300,9 @@ switch action%action
         marks_struct=marks_add_label(marks_struct,info_type, marks_prop);
         
     case {'delete','clear'}
-        info_type=info_type_cell{results{3}};
+        info_type=info_type_cell{label};
         
-        flag_label=results{3};
+        flag_label=label;
         if ischar(flag_label);
             flag_label={flag_label};
         end
