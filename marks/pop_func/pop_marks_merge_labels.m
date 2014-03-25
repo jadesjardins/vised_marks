@@ -14,7 +14,7 @@ end;
 try
     options = varargin;
     for index = 1:length(options)
-        if iscell(options{index}) & ~iscell(options{index}{1}), options{index} = { options{index} }; end;
+        if iscell(options{index}) && ~iscell(options{index}{1}), options{index} = { options{index} }; end;
     end;
     if ~isempty( varargin ), g=struct(options{:});
     else g= []; end;
