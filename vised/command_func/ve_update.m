@@ -94,12 +94,21 @@ EEG.marks.time_info=udf.time_marks_struct;
 %% HANDLE MANUAL SELECTION OF CHANNELS. UPDATE "manual" chan_info... 
 switch udf.data_type
     case 'EEG'
-        for ml_i=1:length(EEG.marks.chan_info)
-            manual_ind_marks=ml_i;%find(strcmp(EEG.marks.chan_info{i}.label,{EEG.marks.chan_info.label}));
-            manual_ind_g=find(strcmp(EEG.marks.chan_info(ml_i).label,{udf.chan_marks_struct.label}));
-            for i=1:length(udf.eloc_file);
-                EEG.marks.chan_info(manual_ind_marks).flags(udf.eloc_file(i).index,1)=udf.chan_marks_struct(manual_ind_g).flags(i,1);
+        for udfl_i=1:length(udf.chan_marks_struct)
+            %manual_ind_marks=ml_i;%find(strcmp(EEG.marks.chan_info{i}.label,{EEG.marks.chan_info.label}));
+            eegl_i=find(strcmp(udf.chan_marks_struct(udfl_i).label,{EEG.marks.chan_info.label}));
+            if isempty(eegl_i)
+                EEG.marks=marks_add_label(EEG.marks,'chan_info', ...
+                    {udf.chan_marks_struct(udfl_i).label, ...
+                    udf.chan_marks_struct(udfl_i).line_color, ...
+                    udf.chan_marks_struct(udfl_i).tag_color, ...
+                    udf.chan_marks_struct(udfl_i).order, ...
+                    zeros(EEG.nbchan,1)});
+                eegl_i=length(EEG.marks.chan_info);
             end
+           for i=1:length(udf.eloc_file);
+               EEG.marks.chan_info(eegl_i).flags(udf.eloc_file(i).index,1)=udf.chan_marks_struct(udfl_i).flags(i,1);
+           end
         end
     case 'ICA'
         for ml_i=1:length(EEG.marks.comp_info)
