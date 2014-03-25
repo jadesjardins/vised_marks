@@ -134,7 +134,7 @@ finalcmdMEG=[try_strings.no_check cmd catch_strings.new_and_hist];
 cmd='[EEG,LASTCOM]=pop_marks_merge_labels(EEG);';
 finalcmdCFM=[try_strings.no_check cmd catch_strings.new_and_hist];
 
-cmd='[EEG,LASTCOM]=pop_marks_add_label(EEG);';
+cmd='[EEG.marks]=pop_marks_add_label(EEG.marks);';
 finalcmdARF=[try_strings.no_check cmd catch_strings.new_and_hist];
 
 %cmd=['if ~isfield(EEG,''marks'');EEG.marks=[];end;', ...

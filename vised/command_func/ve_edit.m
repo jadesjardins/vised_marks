@@ -173,6 +173,7 @@ if ~isempty(g.add_winrej_mark)||~isempty(g.rm_winrej_mark)
                 end
                 if isempty(label_index);
                     tmp_marks_struct.time_info=udf.time_marks_struct;
+                    %tmp_marks_struct.chan_info=udf.chan_marks_struct;
                     tmp_marks_struct=pop_marks_add_label(tmp_marks_struct,'info_type','time_info','label',g.add_winrej_mark, ...
                         'message','Fill in the missing information for the mark that you are adding.');
                     udf.time_marks_struct=tmp_marks_struct.time_info;
