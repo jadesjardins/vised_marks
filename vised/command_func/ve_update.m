@@ -12,6 +12,12 @@ if isfield(udf, 'eventupdate');
             eventindex=length(EEG.event)+1;
             EEG.event(eventindex).latency=udf.eventupdate(i).latency;
             EEG.event(eventindex).type=udf.eventupdate(i).type;
+            EEG.event(eventindex).duration=[];
+            EEG.event(eventindex).channel=[];
+            EEG.event(eventindex).bvtime=[];
+            EEG.event(eventindex).bvmknum=[];
+            EEG.event(eventindex).code=[];
+            EEG.event(eventindex).urevent=[];
             if ndims(EEG.data)==3;
                 EEG.event(eventindex).epoch=udf.eventupdate(i).epoch;
             end
@@ -20,20 +26,20 @@ if isfield(udf, 'eventupdate');
             eventindex=udf.eventupdate(i).index;
             EEG.event(eventindex).action='clear';
         end
-        if strcmp(udf.eventupdate(i).proc, 'edit');
-            eventindex=udf.eventupdate(i).index;
-            EEG.event(eventindex).action='edit';
-            EEG.event(eventindex).actlat=udf.eventupdate(i).latency;
-        end
+%        if strcmp(udf.eventupdate(i).proc, 'edit');
+%            eventindex=udf.eventupdate(i).index;
+%            EEG.event(eventindex).action='edit';
+%            EEG.event(eventindex).actlat=udf.eventupdate(i).latency;
+%        end
     end
 end
 
 j=0;
 for i=1:length(EEG.event);
     if isfield(EEG.event(i),'action');
-        if strcmp(EEG.event(i).action,'edit');
-            EEG.event(i).latency=EEG.event(i).actlat;
-        end
+%        if strcmp(EEG.event(i).action,'edit');
+%            EEG.event(i).latency=EEG.event(i).actlat;
+%        end
         if strcmp(EEG.event(i).action,'clear');
             j=j+1;
             clearInd(j)=i;
@@ -53,19 +59,20 @@ if exist('clearInd');
 end
 
 %sort events.
-if ~isempty(EEG.event);
-    tmpevent  = EEG.event;
-    eventorder=[1:length(EEG.event);[tmpevent.latency]]';
-    eventorder=sortrows(eventorder,2);
-    for i=1:length(EEG.event);
-        TMP.event(i)=EEG.event(eventorder(i,1));
-    end
-else
-    TMP.event=[];
-end
+%if ~isempty(EEG.event);
+%    tmpevent  = EEG.event;
+%    eventorder=[1:length(EEG.event);[tmpevent.latency]]';
+%    eventorder=sortrows(eventorder,2);
+%    for i=1:length(EEG.event);
+%        TMP.event(i)=EEG.event(eventorder(i,1));
+%    end
+%else
+%    TMP.event=[];
+%end
 
-rmfield(EEG,'event');
-EEG.event=TMP.event;
+%rmfield(EEG,'event');
+%EEG.event=TMP.event;
+
 
 EEG=eeg_checkset(EEG, 'eventconsistency');
 
