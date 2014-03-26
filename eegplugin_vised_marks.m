@@ -33,6 +33,9 @@
 
 function eegplugin_vised_marks(fig,try_strings,catch_strings)
 
+%% start up
+addpath(genpath(fileparts(which('eegplugin_vised_marks.m'))));
+
 %% vised
 % find EEGLAB tools menu.
 % ---------------------
