@@ -54,6 +54,8 @@ classdef visedconfig_obj
         altselectcommand={''}
         extselectcommand={''}
         keyselectcommand={''}
+        
+        mouse_data_front='on'
 
         trialstag=[]
         datastd=[]

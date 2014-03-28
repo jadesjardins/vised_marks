@@ -284,6 +284,7 @@ if ~isstr(data) % If NOT a 'noui' call or a callback from uicontrols
    try, g.altselectcommand; catch, g.altselectcommand = { }; end;
    try, g.extselectcommand; catch, g.extselectcommand = { }; end;
    try, g.keyselectcommand; catch, g.keyselectcommand = { }; end;
+   try, g.mouse_data_front; catch, g.mouse_data_front = 'on';end;
    try, g.datastd;          catch, g.datastd = []; end; %ozgur
    try, g.normed;           catch, g.normed = 0; end; %ozgur
    try,g.envelope;          catch, g.envelope = 0; end;%ozgur
@@ -308,7 +309,7 @@ if ~isstr(data) % If NOT a 'noui' call or a callback from uicontrols
                'freqlimits' 'submean' 'children' 'limits' 'dispchans' 'wincolor' ...
                'ploteventdur' 'butlabel' 'scale' 'events' 'data2' 'plotdata2' 'mocap' ...
                'selectcommand' 'altselectcommand' 'extselectcommand'  'keyselectcommand'...
-               'datastd' 'normed' 'envelope' 'chaninfo' ...
+               'mouse_data_front' 'datastd' 'normed' 'envelope' 'chaninfo' ...
                'data_type' 'chan_marks_struct' 'time_marks_struct' ...
                'marks_y_loc' 'inter_mark_int' 'inter_tag_int' ...
                'marks_col_int' 'marks_col_alpha'},;
@@ -528,7 +529,7 @@ if ~isstr(data) % If NOT a 'noui' call or a callback from uicontrols
 	'Style','edit', ...
 	'Tag','EPosition',...
 	'string', fastif(g.trialstag(1) == -1, '0', '1'),...
-	'Callback','set(gcbo,''enable'',''off'');drawnow;set(gcbo,''enable'',''on'');ve_eegplot(''drawp'',0);');
+	'Callback','ve_eegplot(''drawp'',0);');
   u(3) = uicontrol('Parent',figh, ...
 	'Units', 'normalized', ...
 	'Position',posbut(3,:), ...
@@ -567,7 +568,7 @@ if ~isstr(data) % If NOT a 'noui' call or a callback from uicontrols
 	'Style','edit', ...
 	'Tag','ESpacing',...
 	'string',num2str(g.spacing),...
-	'Callback','set(gcbo,''enable'',''off'');drawnow;set(gcbo,''enable'',''on'');ve_eegplot(''draws'',0);');
+	'Callback','ve_eegplot(''draws'',0);');
 
 % Slider for vertical motion
   u(20) = uicontrol('Parent',figh, ...
@@ -1846,6 +1847,28 @@ else
         end;
         ax1 = findobj('tag','eegaxis','parent',fig);
         tmppos = get(ax1, 'currentpoint');
+        xlims=get(ax1,'XLim');
+        ylims=get(ax1,'YLim');
+        
+        if (tmppos(1,1)>xlims(1)&&tmppos(1,1)<xlims(2))&& ...
+                (tmppos(1,2)>ylims(1)&&tmppos(1,2)<ylims(2))
+            if strcmp(g.mouse_data_front,'on')
+                figure(gcbf);
+            end
+            global on_data_ax;
+            if isempty(on_data_ax);
+                esh=findobj('tag','ESpacing','parent',gcbf);
+                set(esh,'enable','off');drawnow;set(esh,'enable','on');
+                eph=findobj('tag','EPosition','parent',gcbf);
+                set(eph,'enable','off');drawnow;set(eph,'enable','on');
+                on_data_ax=1;
+            end
+        end
+        if (tmppos(1,1)<xlims(1)||tmppos(1,1)>xlims(2))|| ...
+                (tmppos(1,2)<ylims(1)||tmppos(1,2)>ylims(2))
+            global on_data_ax;
+            if ~isempty(on_data_ax);clear global on_data_ax;end
+        end
         tmpelec = round(tmppos(1,2) / g.spacing);
         tmpelec = min(max(double(tmpelec), 1),g.chans);
         labls = get(ax1, 'YtickLabel');
