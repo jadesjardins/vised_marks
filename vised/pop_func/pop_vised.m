@@ -166,8 +166,7 @@ end
 
 
 %eegplot_options...
-try vised_config.srate=g.srate;
-catch, if isempty(vised_config.srate);vised_config.srate=EEG.srate;end
+try vised_config.srate=g.srate;                           catch,end
 end
 
 try vised_config.spacing = g.spacing;                     catch,end
@@ -569,19 +568,6 @@ for i=1:length(vised_config.chan_marks_struct);
     vised_config.chan_marks_struct(i).flags=vised_config.chan_marks_struct(i).flags(chans);
 end
 
-%% COLLECT EEGPLOT_OPTIONS AND EXECUTE CALL TO EEGPLOT...
-vararg_cell=object2varargin(vised_config,vised_option_names);
-for i=1:length(vararg_cell);
-    if ischar(vararg_cell{i});
-        if strcmp(vararg_cell{i},'tmp_events');
-            vararg_cell{i}='events';
-        end
-    end
-end
-ve_eegplot(data, vararg_cell{:});
-%% RETURN COMMAND AND EVALUATE CALL TO VISED
-com=sprintf('EEG = pop_vised( %s, {%s});', inputname(1), vararg2str(vised_config.event_type));
-
 %% UPDATE VISED_CONFIG GLOBAL VARIABLE IF REQUESTED...
 if update_global;
     %remove some file specific variables first...
@@ -595,5 +581,20 @@ if update_global;
     
     VISED_CONFIG=tmp_vised_config;
 end
+
+if isempty(vised_config.srate);vised_config.srate=EEG.srate;end
+
+%% COLLECT EEGPLOT_OPTIONS AND EXECUTE CALL TO EEGPLOT...
+vararg_cell=object2varargin(vised_config,vised_option_names);
+for i=1:length(vararg_cell);
+    if ischar(vararg_cell{i});
+        if strcmp(vararg_cell{i},'tmp_events');
+            vararg_cell{i}='events';
+        end
+    end
+end
+ve_eegplot(data, vararg_cell{:});
+%% RETURN COMMAND AND EVALUATE CALL TO VISED
+com=sprintf('EEG = pop_vised( %s, {%s});', inputname(1), vararg2str(vised_config.event_type));
 
 
