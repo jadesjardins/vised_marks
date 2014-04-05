@@ -167,7 +167,6 @@ end
 
 %eegplot_options...
 try vised_config.srate=g.srate;                           catch,end
-end
 
 try vised_config.spacing = g.spacing;                     catch,end
 try vised_config.eloc_file = g.eloc_file;                 catch,end
