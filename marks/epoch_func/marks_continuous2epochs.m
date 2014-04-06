@@ -34,23 +34,52 @@ elseif EEG.trials > 1
    error('input dataset must be continuous data (1 epoch)');
 end
 
-if nargin > 1 && ~isstr(varargin{1})
-    options = {};
-    if nargin >= 2, options = { options{:} 'recurrence' varargin{1} }; end;
-    if nargin >= 3, options = { options{:} 'limits'     varargin{2} }; end;
-    if nargin >= 5, options = { options{:} 'keepboundary'     varargin{3} }; end;
+%% INITIATE VARARGIN STRUCTURES...
+try
+    options = varargin;
+    for index = 1:length(options)
+        if iscell(options{index}) && ~iscell(options{index}{1}), options{index} = { options{index} }; end;
+    end;
+    if ~isempty( varargin ), g=struct(options{:});
+    else g= []; end;
+catch
+    disp('marks_continuous2epochs() error: calling convention {''key'', value, ... } error'); return;
+end;
+
+try g.recurrence;    catch, g.recurrence    =[1];disp('Using default recurrence of 1 second...');end
+try g.limits;        catch, g.limits        =[0 1];disp('Using default limits of [0 1] secons...');end
+try g.keepboundary;  catch, g.keepboundary  ='on'; end
+try g.rmbase;        catch, g.rmbase        =[NaN];end
+try g.eventtype;     catch, g.eventtype     ='tmp_cnt2win';end
+try g.extractepochs; catch, g.extractepochs ='on';end
+
+%if nargin > 1 && ~isstr(varargin{1})
+%    options = {};
+%    if nargin >= 2, options = { options{:} 'recurrence' varargin{1} }; end;
+%    if nargin >= 3, options = { options{:} 'limits'     varargin{2} }; end;
+%    if nargin >= 5, options = { options{:} 'keepboundary'     varargin{3} }; end;
     
 %    if nargin >= 4, options = { options{:} 'rmbase'     varargin{3} }; end;
-else
-    options = varargin;
-end;
-g = finputcheck(options, { 'recurrence'    'real'  []  1;
-                            'limits'        'real'  []  [0 1];
-                            'keepboundary'  'string' {'on','off'} 'on';
-                            'rmbase'        'real'  []  [NaN];
-                            'eventtype'     'string' {} 'tmp_cnt2win';
-                            'extractepochs' 'string' { 'on','off' } 'on' }, 'eeg_regepochs');
-if isstr(g), error(g); end;
+%else
+%    options = varargin;
+%end;
+%g = finputcheck(options, { 'recurrence'    'real'  []  1;
+%                            'limits'        'real'  []  [0 1];
+%                            'keepboundary'  'string' {'on','off'} 'on';
+%                            'rmbase'        'real'  []  [NaN];
+%                            'eventtype'     'string' {} 'tmp_cnt2win';
+%                            'extractepochs' 'string' { 'on','off' } 'on' }, 'eeg_regepochs');
+%if isstr(g), error(g); end;
+
+% CHECK INPUTS
+if length(g.limits)~=2;
+    msg=sprintf('%s\r%s\r%s\r%s\r','"limits" input must have two values representing start point',...
+          'and end point of epochs relative to recurrence.', ...
+          '(e.g. [-.5 .5] for one second epochs centered on recurrence events)...', ...
+          'Doing nothing...');
+      disp(msg);
+      return
+end
 
 %% ADJUST INPUTS ...
 if EEG.srate*g.recurrence~=round(EEG.srate*g.recurrence);

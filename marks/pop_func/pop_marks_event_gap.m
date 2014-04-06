@@ -86,6 +86,8 @@ if nargin < 5
     'pophelp(''pop_mark_event_gap'');', 'mark periods of time between event sequences -- pop_mark_event_gap()' ...
     );
 
+    if isempty(results);return;end
+
     eval(['event_type = {',results{1},'};']);
     if results{2}==0;
         g.exact='off';

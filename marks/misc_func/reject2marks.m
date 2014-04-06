@@ -1,7 +1,11 @@
 function EEG=reject2marks(EEG)
 
 if ~isfield(EEG,'marks');
-    EEG.marks=marks_init();
+    if isempty(EEG.icaweights);
+        EEG.marks=marks_init(size(EEG.data));
+    else
+        EEG.marks=marks_init(size(EEG.data),min(size(EEG.icaweights)));
+    end
 end
 
 %CREATE MARKS.TIME_INFO INSTANCES FROM REJECT STRUCTURE FIELDS...

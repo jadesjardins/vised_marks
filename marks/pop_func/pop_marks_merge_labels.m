@@ -41,8 +41,9 @@ end
 if nargin < 3
     
     results=inputgui( ...
-        {[3 3] [1] [5 1] 1 [5 1]}, ...
+        {[1] [3 3] [1] [5 1] 1 [5 1]}, ...
         {...
+        {'Style', 'text', 'string',blanks(140)}, ...
         ...%1
         {'Style', 'text', 'string', 'Info type to edit'}, ...
         ... %2
@@ -99,6 +100,8 @@ if nargin < 3
         'pophelp(''pop_mark_merge_label'');', 'merge marks labels into target label -- pop_mark_flag_gap()' ...
         );
     
+    if isempty(results);return;end
+    
     infotype_ind  	 = results{1};
     infotype=infotype_cell{infotype_ind};
     labels     	     = eval(['{',results{2},'};']); 
@@ -106,6 +109,12 @@ if nargin < 3
 %    newlabel  = results{3};
 %    newcolor      = results{4};
 end
+
+if isempty(labels)||isempty(g.target_label)
+    disp('Both "labels" and "target_label" inputs must be specified... Doing nothing...');
+    return
+end
+
 if iscell(g.target_label)
     g.target_label=g.target_label{1};
 end

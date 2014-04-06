@@ -1,5 +1,7 @@
 function marks_struct = marks_init(datasize,ncomps)
 
+disp('Building initial marks structure...');
+
 if length(datasize)==2;datasize(3)=1;end
 marks_struct=[];
 %if isfield(EEG,'marks');

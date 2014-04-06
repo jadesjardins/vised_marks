@@ -118,7 +118,13 @@ for epi=1:EEG.trials;
             EEG.event(evtcount).latency=clat;
             EEG.event(evtcount).epoch=1;
         else
-            if clat>lastevtpnt && EEG.event(evtcount).urevent~=EEG.epoch(epi).eventurevent{evi};
+            if iscell(EEG.epoch(epi).eventurevent);
+                eurevent=EEG.epoch(epi).eventurevent{evi};
+            else
+                eurevent=EEG.epoch(epi).eventurevent(evi);
+            end
+            
+            if clat>lastevtpnt && EEG.event(evtcount).urevent~=eurevent;
                 %add new event to EEG.event structure...
                 evtcount=evtcount+1;
                 EEG.event(evtcount)=tmp.event(EEG.epoch(epi).event(evi));

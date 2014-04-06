@@ -20,6 +20,14 @@ ref_points_cell={'both','first','second'};
 try g.invert_flags; catch; g.invert_flags = 'off';end
 try g.critdir; catch; g.critdir = 'max';end;
 
+if ~isfield(EEG,'marks');
+    if isempty(EEG.icaweights);
+        EEG.marks=marks_init(size(EEG.data));
+    else
+        EEG.marks=marks_init(size(EEG.data),min(size(EEG.icaweights)));
+    end
+end
+
 % pop up window
 % -------------
 if nargin < 5

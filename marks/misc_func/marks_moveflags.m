@@ -7,7 +7,11 @@ switch movetype
     
     case 1
         if ~isfield(EEG,'marks')
-            EEG=marks_init(EEG);
+            if isempty(EEG.icaweights);
+                EEG.marks=marks_init(size(EEG.data));
+            else
+                EEG.marks=marks_init(size(EEG.data),min(size(EEG.icaweights)));
+            end
         end
         
         for i=1:length(EEG.marks.time_info)

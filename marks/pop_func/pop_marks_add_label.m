@@ -44,7 +44,7 @@ catch
 end
 if length(g.datasize)==2;g.datasize(3)=1;end
 
-try g.ncomps,    catch; g.ncomps=[];end
+try g.ncomps;    catch; g.ncomps=[];end
 
 try g.action; action_enable='off';catch; g.action='add';action_enable='on';end
 action_cell={'add','remove','clear'};
@@ -264,7 +264,7 @@ if isempty(results);return;end;
 
 label=results{3};
 if strcmp(label(1),'''')&&strcmp(label(end),'''')
-    disp('trimming "''" of the ends of the label...');
+    disp('trimming "''" off the ends of the label...');
     label=label(2:end-1);
 end
 action=action_cell{results{1}};
