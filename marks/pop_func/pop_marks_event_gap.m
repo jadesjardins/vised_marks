@@ -322,7 +322,7 @@ if ~isfield(EEG,'marks');
     if isempty(EEG.icaweights)
         EEG.marks=marks_init(size(EEG.data));
     else
-        EEG.marks=marks_init(size(EEG.data),'ncomps',min(size(EEG.icaweights)));
+        EEG.marks=marks_init(size(EEG.data),min(size(EEG.icaweights)));
     end
 end
 
