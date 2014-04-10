@@ -424,104 +424,104 @@ if strcmp(vised_config.pop_gui,'on');
 end
 %% ONCE ALL INPUTS ARE ESTABLISHED ...
 
-        % HANDLE chan_index
-        chans=[];
-        if ischar(vised_config.chan_index);
-            chans=eval(vised_config.chan_index);
-        else
-            chans=vised_config.chan_index;
-        end
-        
-        % HANDLE data_type
-        switch vised_config.data_type
-            case 'EEG'
-                if isempty(chans);
-                    chans=1:EEG.nbchan;
-                end
-                
-                data=EEG.data(chans,:,:);
-                
-                for i=1:length(EEG.chanlocs);
-                    EEG.chanlocs(i).index=i;
-                end
-                VisEd.chan=EEG.chanlocs(chans);
-                vised_config.eloc_file=VisEd.chan;
-                %vised_config.data_type=data_type;
-                
-            case 'ICA'
-                if isempty(chans);
-                    chans=1:min(size(EEG.icaweights));
-                end
-                
-                eeglab_options; % changed from eeglaboptions 3/30/02 -sm
-                if option_computeica
-                    data = EEG.icaact;
-                else
-                    data = (EEG.icaweights*EEG.icasphere)*reshape(EEG.data, length(EEG.icaweights(1,:)), EEG.trials*EEG.pnts);
-                    data = reshape( data, size(data,1), EEG.pnts, EEG.trials);
-                end
-                
-                tmpdata=data(chans,:,:);
-                data=[];
-                data=tmpdata;
-                
-                for i=1:length(chans);
-                    VisEd.chan(i).labels=sprintf('%s%s','comp',num2str(chans(i)));
-                    VisEd.chan(i).flag=EEG.reject.gcompreject(chans(i))*-3;
-                    VisEd.chan(i).index=chans(i);
-                end
-                vised_config.eloc_file=VisEd.chan;
-                %vised_config.data_type=data_type;
-        end
+% HANDLE chan_index
+chans=[];
+if ischar(vised_config.chan_index);
+    chans=eval(vised_config.chan_index);
+else
+    chans=vised_config.chan_index;
+end
 
-        
-        % HANDLE event_type...
-
-        if ischar(vised_config.event_type);
-            vised_config.event_type=eval(['{',vised_config.event_type,'}']);
+% HANDLE data_type
+switch vised_config.data_type
+    case 'EEG'
+        if isempty(chans);
+            chans=1:EEG.nbchan;
         end
         
-        j=0;
-        if isempty(vised_config.event_type);
-            VisEd.event = [];
+        data=EEG.data(chans,:,:);
+        
+        for i=1:length(EEG.chanlocs);
+            EEG.chanlocs(i).index=i;
+        end
+        VisEd.chan=EEG.chanlocs(chans);
+        vised_config.eloc_file=VisEd.chan;
+        %vised_config.data_type=data_type;
+        
+    case 'ICA'
+        if isempty(chans);
+            chans=1:min(size(EEG.icaweights));
+        end
+        
+        eeglab_options; % changed from eeglaboptions 3/30/02 -sm
+        if option_computeica
+            data = EEG.icaact;
         else
-            for i=1:length(EEG.event);
-                if ~isempty(find(strcmp(EEG.event(i).type,vised_config.event_type)));
-                    event=EEG.event(i);
-                    event.index=i;
-                    event.proc='none';
-                    j=j+1;
-                    VisEd.event(j)=event;
-                end
-            end
-        end
-        vised_config.tmp_events=VisEd.event;
-        
-        if ~isempty(vised_config.quick_evtmk)%overwrites vised_config.altselectcommand
-            vised_config.altselectcommand={ ['ve_edit(EEG,''quick_evtmk'',''', ...
-                                              vised_config.quick_evtmk, ...
-                                              ''');'] ...
-                                              've_eegplot(''defmotioncom'', gcbf);' '' };
+            data = (EEG.icaweights*EEG.icasphere)*reshape(EEG.data, length(EEG.icaweights(1,:)), EEG.trials*EEG.pnts);
+            data = reshape( data, size(data,1), EEG.pnts, EEG.trials);
         end
         
-        switch vised_config.quick_evtrm
-            case 'ext_press'
-                vised_config.extselectcommand={ ['ve_edit(EEG,''quick_evtrm'',''on'');'] ...
-                                              've_eegplot(''defmotioncom'', gcbf);' '' };
-            case 'alt_press'
-                vised_config.altselectcommand={ ['ve_edit(EEG,''quick_evtrm'',''on'');'] ...
-                                              've_eegplot(''defmotioncom'', gcbf);' '' };
-        end
+        tmpdata=data(chans,:,:);
+        data=[];
+        data=tmpdata;
         
-        switch vised_config.quick_chanflag
-            case 'ext_press'
-                vised_config.extselectcommand={ ['ve_edit(EEG,''quick_chanflag'',''manual'');'] ...
-                                              've_eegplot(''defmotioncom'', gcbf);' '' };
-            case 'alt_press'
-                vised_config.altselectcommand={ ['ve_edit(EEG,''quick_chanflag'',''manual'');'] ...
-                                              've_eegplot(''defmotioncom'', gcbf);' '' };
+        for i=1:length(chans);
+            VisEd.chan(i).labels=sprintf('%s%s','comp',num2str(chans(i)));
+            VisEd.chan(i).flag=EEG.reject.gcompreject(chans(i))*-3;
+            VisEd.chan(i).index=chans(i);
         end
-        
+        vised_config.eloc_file=VisEd.chan;
+        %vised_config.data_type=data_type;
+end
+
+
+% HANDLE event_type...
+
+if ischar(vised_config.event_type);
+    vised_config.event_type=eval(['{',vised_config.event_type,'}']);
+end
+
+j=0;
+if isempty(vised_config.event_type);
+    VisEd.event = [];
+else
+    for i=1:length(EEG.event);
+        if ~isempty(find(strcmp(EEG.event(i).type,vised_config.event_type)));
+            event=EEG.event(i);
+            event.index=i;
+            event.proc='none';
+            j=j+1;
+            VisEd.event(j)=event;
+        end
+    end
+end
+vised_config.tmp_events=VisEd.event;
+
+if ~isempty(vised_config.quick_evtmk)%overwrites vised_config.altselectcommand
+    vised_config.altselectcommand={ ['ve_edit(EEG,''quick_evtmk'',''', ...
+        vised_config.quick_evtmk, ...
+        ''');'] ...
+        've_eegplot(''defmotioncom'', gcbf);' '' };
+end
+
+switch vised_config.quick_evtrm
+    case 'ext_press'
+        vised_config.extselectcommand={ ['ve_edit(EEG,''quick_evtrm'',''on'');'] ...
+            've_eegplot(''defmotioncom'', gcbf);' '' };
+    case 'alt_press'
+        vised_config.altselectcommand={ ['ve_edit(EEG,''quick_evtrm'',''on'');'] ...
+            've_eegplot(''defmotioncom'', gcbf);' '' };
+end
+
+switch vised_config.quick_chanflag
+    case 'ext_press'
+        vised_config.extselectcommand={ ['ve_edit(EEG,''quick_chanflag'',''manual'');'] ...
+            've_eegplot(''defmotioncom'', gcbf);' '' };
+    case 'alt_press'
+        vised_config.altselectcommand={ ['ve_edit(EEG,''quick_chanflag'',''manual'');'] ...
+            've_eegplot(''defmotioncom'', gcbf);' '' };
+end
+
 
 
 %% PREPARE VARIABLES FOR EEGPLOT ...
