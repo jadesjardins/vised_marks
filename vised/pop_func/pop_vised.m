@@ -272,6 +272,7 @@ PropGridStr=['global vecp;global vised_config;' ...
     '''Position'', [.04 .11 .92 .61]);' ...
     ];
 
+update_global=0;
 if strcmp(vised_config.pop_gui,'on');
     
     % PREPARE VARIABLES FOR POP UP WINDOW ...
@@ -557,8 +558,9 @@ switch vised_config.data_type
         end
     case 'ICA'
         if isempty(vised_config.chan_marks_struct);
-        end
-        if isempty(vised_config.chan_marks_struct);
+            if isempty(EEG.marks.comp_info.flags);
+                EEG.marks.comp_info.flags=zeros(min(size(EEG.icaweights)),1);
+            end
             vised_config.chan_marks_struct=EEG.marks.comp_info;
         end
 end
