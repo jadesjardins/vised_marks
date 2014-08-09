@@ -557,6 +557,8 @@ switch vised_config.data_type
             vised_config.chan_marks_struct=EEG.marks.chan_info;
         end
     case 'ICA'
+        %if isempty(vised_config.chan_marks_struct);
+        %end
         if isempty(vised_config.chan_marks_struct);
             if isempty(EEG.marks.comp_info.flags);
                 EEG.marks.comp_info.flags=zeros(min(size(EEG.icaweights)),1);
