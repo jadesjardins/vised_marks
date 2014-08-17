@@ -23,6 +23,12 @@ try g.add_winrej_mark;          catch
     try g.add_winrej_mark=g.awm;catch,     g.add_winrej_mark    ='';    end;end;
 try g.rm_winrej_mark;           catch
     try g.rm_winrej_mark=g.rwm; catch,     g.rm_winrej_mark     ='';    end;end;
+
+try g.add_page_mark;            catch
+    try g.add_page_mark=g.apm;  catch,     g.add_page_mark      ='';    end;end;
+try g.page_forward;             catch
+    try g.page_forward=g.pf;    catch,     g.page_forward       ='off';    end;end;
+
 try g.data_move;                catch
     try g.data_move=g.dm;       catch,     g.data_move          ='off';    end;end;
 
@@ -158,35 +164,53 @@ if strcmp(g.select_mark,'on');
     return
 end
 
-if ~isempty(g.add_winrej_mark)||~isempty(g.rm_winrej_mark)
+if ~isempty(g.add_winrej_mark)||~isempty(g.add_page_mark)||~isempty(g.rm_winrej_mark)
     cxpnt=g.eventedit.WinStartPnt+round(g.tmppos(1,1));
+
+    %find mark index
+    if ~isempty(g.add_winrej_mark)
+        mark_label=g.add_winrej_mark;
+    elseif ~isempty(g.add_page_mark)
+        mark_label=g.add_page_mark;
+    end
+
+    if strcmp(mark_label,'pop_select')
+        label_index=pop_chansel({udf.time_marks_struct.label});
+    else
+        label_index=find(strcmp(mark_label,{udf.time_marks_struct.label}));
+    end
+    if isempty(label_index);
+        tmp_marks_struct.time_info=udf.time_marks_struct;
+        %tmp_marks_struct.chan_info=udf.chan_marks_struct;
+        tmp_marks_struct=pop_marks_add_label(tmp_marks_struct,'info_type','time_info', ...
+            'label',mark_label, ...
+            'action','add', ...
+            'message','Fill in the missing information for the mark that you are adding.');
+        udf.time_marks_struct=tmp_marks_struct.time_info;
+        if strcmp(mark_label,'pop_select')
+            label_index=pop_chansel({udf.time_marks_struct.label});
+        else
+            label_index=find(strcmp(mark_label,{udf.time_marks_struct.label}));
+        end
         
+    end
+    
+    if ~isempty(g.add_page_mark)
+        %get handle eegaxis
+        %get handle espace
+        %get handle epos
+        
+        udf.time_marks_struct(label_index).flags(g.eventedit.WinStartPnt+1:g.eventedit.WinStartPnt+(udf.winlength*udf.srate))=1;
+    end
+    
     for wi=1:size(udf.winrej,1)
         if cxpnt>udf.winrej(wi,1)&&cxpnt<udf.winrej(wi,2)
             disp(['hit winrej X ' num2str(cxpnt)]);
-            %find mark index
+
             if ~isempty(g.add_winrej_mark)
-                if strcmp(g.add_winrej_mark,'pop_select')
-                    label_index=pop_chansel({udf.time_marks_struct.label});
-                else
-                    label_index=find(strcmp(g.add_winrej_mark,{udf.time_marks_struct.label}));
-                end
-                if isempty(label_index);
-                    tmp_marks_struct.time_info=udf.time_marks_struct;
-                    %tmp_marks_struct.chan_info=udf.chan_marks_struct;
-                    tmp_marks_struct=pop_marks_add_label(tmp_marks_struct,'info_type','time_info', ...
-                                            'label',g.add_winrej_mark, ...
-                                            'action','add', ...
-                        'message','Fill in the missing information for the mark that you are adding.');
-                    udf.time_marks_struct=tmp_marks_struct.time_info;
-                    if strcmp(g.add_winrej_mark,'pop_select')
-                        label_index=pop_chansel({udf.time_marks_struct.label});
-                    else
-                        label_index=find(strcmp(g.add_winrej_mark,{udf.time_marks_struct.label}));
-                    end
-                    
-                end
+
                 udf.time_marks_struct(label_index).flags(round(udf.winrej(wi,1)):round(udf.winrej(wi,2)))=1;
+                
                 if strcmp(g.data_move,'on');
                     if ~isfield(udf,'urdata');udf.urdata=uda;end
                     if isfield(udf,'data2');
@@ -209,34 +233,15 @@ if ~isempty(g.add_winrej_mark)||~isempty(g.rm_winrej_mark)
                     end
                 end
             end
-            set(gcf,'userdata',udf);
-            ve_eegplot('drawp',0)
         end
+    end
+    set(gcf,'userdata',udf);
+    if strcmp(g.page_forward,'off');
+        ve_eegplot('drawp',0)
+    else
+        ve_eegplot('drawp',4)
     end
     return
 end
-
-%if ~isempty(g.rm_winrej_mark)
-%    cxpnt=g.eventedit.WinStartPnt+round(g.tmppos(1,1));
-%        
-%    for wi=1:size(udf.winrej,1)
-%        if cxpnt>udf.winrej(wi,1)&&cxpnt<udf.winrej(wi,2)
-%            disp(['hit winrej X ' num2str(cxpnt)]);
-%            %find mark index
-%            if strcmp(g.rm_winrej_mark,'pop_select')
-%                label_index=pop_chansel({udf.time_marks_struct.label});
-%            else
-%                label_index=find(strcmp(g.add_winrej_mark,{udf.time_marks_struct.label}));
-%            end
-%            udf.time_marks_struct(label_index).flags(round(udf.winrej(wi,1)):round(udf.winrej(wi,2)))=0;
-%            set(gcf,'userdata',udf);
-%            ve_eegplot('drawp',0)
-%        end
-%    end
-%    return
-%end
-
-
-% Call event edit UI.
 
 pop_ve_edit(g);

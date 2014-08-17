@@ -234,7 +234,7 @@ if ~isstr(data) % If NOT a 'noui' call or a callback from uicontrols
    %try
        options = varargin;
        for index = 1:length(options)
-           if iscell(options{index}) & ~iscell(options{index}{1}), options{index} = { options{index} }; end;
+           if iscell(options{index}) && ~iscell(options{index}{1}), options{index} = { options{index} }; end;
        end;
        if ~isempty( varargin ), g=struct(options{:});
        else g= []; end;
@@ -1187,7 +1187,14 @@ else
     for fi=1:n_mark_inds;
         chan_inds=find(g.chan_marks_struct(mark_inds(n_mark_inds-(fi-1))).flags);
         tmp_color=g.chan_marks_struct(mark_inds(n_mark_inds-(fi-1))).line_color;
-        for ci=1:length(chan_inds);
+        if strcmp(g.plotdata2, 'on');
+            if length(g.color)==2;
+                tmp_color=g.color{2};
+            else
+                tmp_color=[.7 .7 .7];
+            end
+        end
+       for ci=1:length(chan_inds);
             %plot tick...
             plot(1+tag_x_int*mark_inds(n_mark_inds-(fi-1)),(g.chans-(chan_inds(ci)-1))*g.spacing,'<', ...
                 'MarkerEdgeColor', g.chan_marks_struct(mark_inds(n_mark_inds-(fi-1))).tag_color, ...
@@ -1239,7 +1246,14 @@ else
     end
     colormap(cmap); 
     chan_inds=find(sum([g.chan_marks_struct.flags],2)==0);
-    tmp_color=[0,0,.3];
+    tmp_color=g.color{:};%[0,0,.3];
+        if strcmp(g.plotdata2, 'on');
+            if length(g.color)==2;
+                tmp_color=g.color{2};
+            else
+                tmp_color=[.7 .7 .7];
+            end
+        end
     for ci=1:length(chan_inds);
         tmp_offset=(g.chans-(chan_inds(ci)-1))*g.spacing-(meandata(chan_inds(ci)));
         line(1:length(lowlim:highlim),data(chan_inds(ci),lowlim:highlim) + tmp_offset, ones(1,length(lowlim:highlim))*100, ...
@@ -1253,6 +1267,13 @@ else
         chan_inds=[];
         chan_inds=find(g.chan_marks_struct(mark_inds(fi)).flags);
         tmp_color=g.chan_marks_struct(mark_inds(fi)).line_color;
+        if strcmp(g.plotdata2, 'on');
+            if length(g.color)==2;
+                tmp_color=g.color{2};
+            else
+                tmp_color=[.7 .7 .7];
+            end
+        end
         for ci=1:length(chan_inds);
             %plot tick...
             plot(1+tag_x_int*mark_inds(fi),(g.chans-(chan_inds(ci)-1))*g.spacing,'<', ...
