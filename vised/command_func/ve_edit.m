@@ -1,5 +1,24 @@
-function ve_edit(varargin)%GET RID OF EEG...
+function ve_edit(varargin)
 
+%% ONLY FOLLOW THROUGH IF THE CURRENTOBJ IS NOT ESPACING OR EPOSITION...
+
+% Get the figure and axis userdata...
+udf=get(gcf,'userdata');
+uda=get(gca,'userdata');
+
+h_eegaxis=findobj('tag','eegaxis','parent',gcf);
+h_espacing=findobj('tag','ESpacing','parent',gcf);
+h_eposition=findobj('tag','EPosition','parent',gcf);
+
+current_obj=get(gcf,'CurrentObject');
+
+if ~isempty(current_obj);
+    if current_obj==h_espacing || current_obj==h_eposition;
+        return
+    end
+end
+
+%% HANDLE THE INPUTS...
 options = varargin;
 for index = 1:length(options)
     if iscell(options{index}) && ~iscell(options{index}{1}), options{index} = { options{index} }; end;
@@ -26,34 +45,19 @@ try g.rm_winrej_mark;           catch
 
 try g.add_page_mark;            catch
     try g.add_page_mark=g.apm;  catch,     g.add_page_mark      ='';    end;end;
+try g.rm_page_mark;             catch
+    try g.rm_page_mark=g.rpm;   catch,     g.rm_page_mark       ='';    end;end;
+
 try g.page_forward;             catch
     try g.page_forward=g.pf;    catch,     g.page_forward       ='off';    end;end;
 
 try g.data_move;                catch
     try g.data_move=g.dm;       catch,     g.data_move          ='off';    end;end;
 
-%ax1 = findobj('tag','backeeg','parent',gcf);
-%tmppos = get(ax1, 'currentpoint');
-g.tmppos=get(findobj('tag','eegaxis','parent',gcf), 'currentpoint');
+%% Store "tmppos" in the "g" structures...             
+g.tmppos=get(h_eegaxis,'currentpoint');
 
-% Store "UserData" and "temppos" variables to "g" structures.             
-udf=get(gcf,'userdata');
-uda=get(gca,'userdata');
-
-%g.tmppos=tmppos;
-
-%g.quick_evtmk=tmp_g.quick_evtmk;
-%g.quick_evtrm=tmp_g.quick_evtrm;
-%g.quick_chanflag=tmp_g.quick_chanflag;
-
-%g.select_mark=tmp_g.select_mark;
-%g.add_winrej_mark=tmp_g.add_winrej_mark;
-%g.rm_winrej_mark=tmp_g.rm_winrej_mark;
-
-%nevents=length(udf.events);
-
-%datasize=size(uda);
-
+%% Handle the index of the events...
 if ~isfield(udf.events, 'index');
     for i=1:length(udf.events);
         udf.events(i).index=i;
@@ -61,7 +65,7 @@ if ~isfield(udf.events, 'index');
     end
 end
 
-% Define relative starting point for figure window latencies: "EEG.eventedit.WinStartPnt"
+%% Define relative starting point for figure window latencies: "EEG.eventedit.WinStartPnt"
 if size(uda,3)==1; % define WinStartPt. data point at wich current display window begins.
     g.eventedit.WinStartPnt=udf.time*udf.srate;
     g.eventedit.EpochIndex=1;
@@ -74,7 +78,7 @@ end;
 g.eventedit.PosLat=round(g.tmppos(1,1)+g.eventedit.WinStartPnt);
 
 
-% Identify selected channel.
+%% Identify selected channel.
 % By default use the 'Eelec' tex display of eegplot.
 tmpChanIndex=strmatch(get(findobj(gcf,'Tag','Eelec'),'string'),{udf.eloc_file.labels},'exact');
 if length(tmpChanIndex)==1;
@@ -102,26 +106,23 @@ else
 end
 clear tmpChanIndex
 
-% Check for event selection.
-%if ~isempty(EEG.event);
-    pntdist=ceil((udf.winlength*udf.srate)*0.002);
-    % Check for event selection.
-    if isfield(g.eventedit, 'SelEventStruct');
-        g=rmfield(g.eventedit,'SelEventStruct');
+%% Check for event selection.
+pntdist=ceil((udf.winlength*udf.srate)*0.002);
+if isfield(g.eventedit, 'SelEventStruct');
+    g=rmfield(g.eventedit,'SelEventStruct');
+end
+j=0;
+for i=1:length(udf.events);
+    if abs(udf.events(i).latency-g.eventedit.PosLat)<pntdist;
+        j=j+1;
+        g.eventedit.SelEventStruct(j).index=i;
+        g.eventedit.SelEventStruct(j).dist=abs(udf.events(i).latency-round(g.tmppos(1,1)+g.eventedit.WinStartPnt));
+        g.eventedit.SelEventStruct(j).type=udf.events(i).type;
+        g.eventedit.SelEventStruct(j).latency=udf.events(i).latency;
     end
-    j=0;
-    for i=1:length(udf.events);
-        if abs(udf.events(i).latency-g.eventedit.PosLat)<pntdist;
-            j=j+1;
-            g.eventedit.SelEventStruct(j).index=i;
-            g.eventedit.SelEventStruct(j).dist=abs(udf.events(i).latency-round(g.tmppos(1,1)+g.eventedit.WinStartPnt));
-            g.eventedit.SelEventStruct(j).type=udf.events(i).type;
-            g.eventedit.SelEventStruct(j).latency=udf.events(i).latency;
-        end
-    end
-%end
+end
 
-
+%% HANDLE SELECT_MARK...
 if strcmp(g.select_mark,'on');
     ylims=get(gca,'YLim');
     cxpnt=g.eventedit.WinStartPnt+round(g.tmppos(1,1));
@@ -133,9 +134,9 @@ if strcmp(g.select_mark,'on');
             l=ylims(1)+inter_time_mark_offset*tmi+(time_marks_offset(i))-(inter_time_mark_offset*length(udf.time_marks_struct));
             h=ylims(1)+inter_time_mark_offset*tmi+(time_marks_offset(i))+inter_time_mark_offset-(inter_time_mark_offset*length(udf.time_marks_struct));
             if g.tmppos(1,2)>l&&g.tmppos(1,2)<h;
-                disp(['hit mark Y ',num2str(tmi)]);
+                %disp(['hit mark Y ',num2str(tmi)]);
                 if udf.time_marks_struct(tmi).flags(cxpnt);
-                    disp(['hit mark X ' num2str(cxpnt)]);
+                    %disp(['hit mark X ' num2str(cxpnt)]);
                     for pi=1:cxpnt-1;
                         if udf.time_marks_struct(tmi).flags(cxpnt-pi)==0||cxpnt-pi==0;
                             bnd(1)=cxpnt-(pi-1);
@@ -164,7 +165,8 @@ if strcmp(g.select_mark,'on');
     return
 end
 
-if ~isempty(g.add_winrej_mark)||~isempty(g.add_page_mark)||~isempty(g.rm_winrej_mark)
+%% HANDLE ADD/REMOVE MARKS... 
+if ~isempty(g.add_winrej_mark)||~isempty(g.add_page_mark)||~isempty(g.rm_winrej_mark)||~isempty(g.rm_page_mark)
     cxpnt=g.eventedit.WinStartPnt+round(g.tmppos(1,1));
 
     %find mark index
@@ -172,6 +174,10 @@ if ~isempty(g.add_winrej_mark)||~isempty(g.add_page_mark)||~isempty(g.rm_winrej_
         mark_label=g.add_winrej_mark;
     elseif ~isempty(g.add_page_mark)
         mark_label=g.add_page_mark;
+    elseif ~isempty(g.rm_winrej_mark);
+        mark_label=g.rm_winrej_mark;
+    elseif ~isempty(g.rm_page_mark);
+        mark_label=g.rm_page_mark;
     end
 
     if strcmp(mark_label,'pop_select')
@@ -181,32 +187,24 @@ if ~isempty(g.add_winrej_mark)||~isempty(g.add_page_mark)||~isempty(g.rm_winrej_
     end
     if isempty(label_index);
         tmp_marks_struct.time_info=udf.time_marks_struct;
-        %tmp_marks_struct.chan_info=udf.chan_marks_struct;
         tmp_marks_struct=pop_marks_add_label(tmp_marks_struct,'info_type','time_info', ...
             'label',mark_label, ...
             'action','add', ...
             'message','Fill in the missing information for the mark that you are adding.');
         udf.time_marks_struct=tmp_marks_struct.time_info;
-        if strcmp(mark_label,'pop_select')
-            label_index=pop_chansel({udf.time_marks_struct.label});
-        else
-            label_index=find(strcmp(mark_label,{udf.time_marks_struct.label}));
-        end
+        label_index=length(udf.time_marks_struct);
         
     end
     
     if ~isempty(g.add_page_mark)
-        %get handle eegaxis
-        %get handle espace
-        %get handle epos
-        
         udf.time_marks_struct(label_index).flags(g.eventedit.WinStartPnt+1:g.eventedit.WinStartPnt+(udf.winlength*udf.srate))=1;
+    end
+    if ~isempty(g.add_page_mark)
+        udf.time_marks_struct(label_index).flags(g.eventedit.WinStartPnt+1:g.eventedit.WinStartPnt+(udf.winlength*udf.srate))=9;
     end
     
     for wi=1:size(udf.winrej,1)
         if cxpnt>udf.winrej(wi,1)&&cxpnt<udf.winrej(wi,2)
-            disp(['hit winrej X ' num2str(cxpnt)]);
-
             if ~isempty(g.add_winrej_mark)
 
                 udf.time_marks_struct(label_index).flags(round(udf.winrej(wi,1)):round(udf.winrej(wi,2)))=1;
@@ -220,11 +218,6 @@ if ~isempty(g.add_winrej_mark)||~isempty(g.add_page_mark)||~isempty(g.rm_winrej_
                 end
             end
             if ~isempty(g.rm_winrej_mark)
-                if strcmp(g.rm_winrej_mark,'pop_select')
-                    label_index=pop_chansel({udf.time_marks_struct.label});
-                else
-                    label_index=find(strcmp(g.rm_winrej_mark,{udf.time_marks_struct.label}));
-                end
                 udf.time_marks_struct(label_index).flags(round(udf.winrej(wi,1)):round(udf.winrej(wi,2)))=0;
                 if strcmp(g.data_move,'on');
                     if isfield(udf,'urdata');
