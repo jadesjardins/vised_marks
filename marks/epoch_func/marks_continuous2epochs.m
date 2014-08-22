@@ -100,8 +100,11 @@ if EEG.srate*g.limits(2)~=round(EEG.srate*g.limits(2));
     disp(['New second limit value = ',num2str(g.limits(2))]);
 end
 tmpevt=g.eventtype;
-while ~isempty(strmatch(tmpevt,unique({EEG.event.type})));
-    tmpevt=[tmpevt,'X'];
+
+if ~isempty(EEG.event);
+    while ~isempty(strcmp(tmpevt,unique({EEG.event.type})));
+        tmpevt=[tmpevt,'X'];
+    end
 end
 
 %% ADJUST DATA ARRAY ...
@@ -111,14 +114,18 @@ EEG=marks_moveflags(EEG,1);%CONVERT TO MARKS STRUCTURE
 %% REPLACE BOUNDARY EVENT TYPE IF KEEPBOUNDARY = 'ON'
 if strcmp(g.keepboundary,'on');
     tmpbndtype='tmpbndtype';
-    while ~isempty(find(strcmp(tmpbndtype,unique({EEG.event.type}))));
-        tmpbndtype=[tmpbndtype,'X'];
+    if ~isempty(EEG.event)
+        while ~isempty(find(strcmp(tmpbndtype,unique({EEG.event.type}))));
+            tmpbndtype=[tmpbndtype,'X'];
+        end
     end
-    bndevtind=find(strcmp('boundary',{EEG.event.type}));
-    disp(['renaming ',num2str(length(bndevtind)),' "boundary" events as "',tmpbndtype,'"...']);
-    if ~isempty(bndevtind);
-        for i=1:length(bndevtind);
-            EEG.event(bndevtind(i)).type=tmpbndtype;
+    if ~isempty(EEG.event);
+        bndevtind=find(strcmp('boundary',{EEG.event.type}));
+        disp(['renaming ',num2str(length(bndevtind)),' "boundary" events as "',tmpbndtype,'"...']);
+        if ~isempty(bndevtind);
+            for i=1:length(bndevtind);
+                EEG.event(bndevtind(i)).type=tmpbndtype;
+            end
         end
     end
 end
@@ -140,12 +147,14 @@ disp('Moving time_info channels from data array to marks structure...');
 EEG=marks_moveflags(EEG,2);
 
 %% CORRECT THE BOUNDARY TYPE SWAP...
-if strcmp(g.keepboundary,'on');
-    bndevtind=find(strcmp(tmpbndtype,{EEG.event.type}));
-    disp(['renaming ',num2str(length(bndevtind)),' "',tmpbndtype,'" events as "boundary"...']);
-    if ~isempty(bndevtind);
-        for i=1:length(bndevtind);
-            EEG.event(bndevtind(i)).type='boundary';
+if ~isempty(EEG.event);
+    if strcmp(g.keepboundary,'on');
+        bndevtind=find(strcmp(tmpbndtype,{EEG.event.type}));
+        disp(['renaming ',num2str(length(bndevtind)),' "',tmpbndtype,'" events as "boundary"...']);
+        if ~isempty(bndevtind);
+            for i=1:length(bndevtind);
+                EEG.event(bndevtind(i)).type='boundary';
+            end
         end
     end
 end
