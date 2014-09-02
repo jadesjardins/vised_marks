@@ -1,9 +1,11 @@
 function EEG=marks_epochs2continuous(EEG)
 
 evtcount=0;
+if ~isempty(EEG.event); % in case there are no events
 tmp.event=EEG.event;
 EEG.event=tmp.event(1);
 %rejints=[];
+end
 
 sampdur=(1000/EEG.srate);%duration of each sample...
 relstrtt=EEG.xmin*1000;%relative (to lock event) start time of current window...
