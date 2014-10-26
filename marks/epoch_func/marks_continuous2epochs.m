@@ -115,7 +115,7 @@ EEG=marks_moveflags(EEG,1);%CONVERT TO MARKS STRUCTURE
 if strcmp(g.keepboundary,'on');
     tmpbndtype='tmpbndtype';
     if ~isempty(EEG.event)
-        while ~isempty(find(strcmp(tmpbndtype,unique({EEG.event.type}))));
+        while any(strcmp(tmpbndtype,unique({EEG.event.type})));
             tmpbndtype=[tmpbndtype,'X'];
         end
     end
