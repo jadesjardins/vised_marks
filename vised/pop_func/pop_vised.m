@@ -560,8 +560,10 @@ switch vised_config.data_type
         %if isempty(vised_config.chan_marks_struct);
         %end
         if isempty(vised_config.chan_marks_struct);
-            if isempty(EEG.marks.comp_info.flags);
-                EEG.marks.comp_info.flags=zeros(min(size(EEG.icaweights)),1);
+            for i=1:length(EEG.marks.comp_info);
+                if isempty(EEG.marks.comp_info(i).flags);
+                    EEG.marks.comp_info(i).flags=zeros(min(size(EEG.icaweights)),1);
+                end
             end
             vised_config.chan_marks_struct=EEG.marks.comp_info;
         end
