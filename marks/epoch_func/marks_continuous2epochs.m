@@ -102,7 +102,7 @@ end
 tmpevt=g.eventtype;
 
 if ~isempty(EEG.event);
-    while ~isempty(strcmp(tmpevt,unique({EEG.event.type})));
+    while any(strcmp(tmpevt,unique({EEG.event.type})));
         tmpevt=[tmpevt,'X'];
     end
 end
