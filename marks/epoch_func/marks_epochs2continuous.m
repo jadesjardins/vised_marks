@@ -72,11 +72,11 @@ for epi=1:EEG.trials;
             if isempty(find(time_info_ind==chi));
                 data(chi,EEG.epoch(epi).startpnt-pntgap:EEG.epoch(epi).startpnt-pntgap+(EEG.pnts-1))=EEG.data(chi,:,epi)-winbase(chi);
             else
-                if epi>1;
-                    data(chi,EEG.epoch(epi).startpnt-pntgap:EEG.epoch(epi).startpnt-pntgap+(EEG.pnts-1))=max([EEG.data(chi,1,epi),EEG.data(chi,1,epi-1)]);
-                else
-                    data(chi,EEG.epoch(epi).startpnt-pntgap:EEG.epoch(epi).startpnt-pntgap+(EEG.pnts-1))=EEG.data(chi,1,epi);
-                end
+                %if epi>1;
+                %    data(chi,EEG.epoch(epi).startpnt-pntgap:EEG.epoch(epi).startpnt-pntgap+(EEG.pnts-1))=max([EEG.data(chi,1,epi),EEG.data(chi,1,epi-1)]);
+                %else
+                    data(chi,EEG.epoch(epi).startpnt-pntgap:EEG.epoch(epi).startpnt-pntgap+(EEG.pnts-1))=EEG.data(chi,:,epi);
+                %end
             end
         end
         %if the new window does not overlap the concatenated data...
