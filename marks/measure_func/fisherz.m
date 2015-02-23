@@ -1,14 +1,9 @@
-function out=fisherz(inarray,dim)
+function[z]=fisherz(r)
+%FISHERZ Fisher's Z-transform.
+%   Z = FISHERZ(R) returns the Fisher's Z-transform of the correlation
+%   coefficient R.
 
-if dim==1;
-    for i=1:size(inarray,1);
-        inarray(:,i)=.5.*log((1+inarray(:,i))./(1-inarray(:,i)));
-    end
-end
+%20080103, Thomas Zoeller (tzo@gmx.de)
 
-if dim==2;
-    for i=1:size(inarray,2);
-        inarray(i,:)=.5.*log((1+inarray(i,:))./(1-inarray(i,:)));
-    end
-end
-
+%r=r(:);
+z=.5.*log((1+r)./(1-r));
