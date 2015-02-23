@@ -3,7 +3,7 @@ function [critrow,critcol,rowind,colind]=values2flags(EEG,inmeasure,flagdir,flag
 g=struct(varargin{:});
 
 try g.trim; catch, g.trim=0; end;
-try g.fisherz; catch, g.fisherz='off'; end;
+%try g.fisherz; catch, g.fisherz='off'; end;
 try g.plot_figs; catch, g.plot_figs='off';end;
 
 critrow=[];
@@ -48,11 +48,11 @@ else
     s_thresh=[];
 end
 
-if strcmp(g.fisherz,'on');
-    for i=1:size(inmeasure,1);
-        inmeasure(i,:)=.5.*log((1+inmeasure(i,:))./(1-inmeasure(i,:)));
-    end
-end
+%if strcmp(g.fisherz,'on');
+%    for i=1:size(inmeasure,1);
+%        inmeasure(i,:)=.5.*log((1+inmeasure(i,:))./(1-inmeasure(i,:)));
+%    end
+%end
 
 if flagdir==1||flagdir==3;
     
