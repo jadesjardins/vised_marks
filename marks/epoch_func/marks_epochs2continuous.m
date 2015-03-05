@@ -44,6 +44,7 @@ j=0;
 bndlat=[];
 
 disp(['concatenating ', num2str(EEG.trials), ' epochs...']);
+data=zeros(EEG.nbchan,EEG.pnts*EEG.trials);
 for epi=1:EEG.trials;
     %calculate the distance between the current window and the end
     %of the concatenated data...
@@ -139,6 +140,7 @@ for epi=1:EEG.trials;
         lastevtpnt=EEG.event(evtcount).latency;
     end
 end
+data=data(:,1:EEG.epoch(epi).startpnt-pntgap+(EEG.pnts-1));
 
 for i=1:length(bndlat);
     EEG.event(length(EEG.event)+1).type='boundary';
