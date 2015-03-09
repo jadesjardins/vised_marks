@@ -13,6 +13,7 @@ nchan=size(tmp.data,1);
 ntrial=size(tmp.data,3);
 
 chandist=zeros(nchan,nchan,3);
+
 for chani=1:nchan;
     for chanii=1:nchan;
         if ~isempty(tmp.chanlocs(chanii).X)
@@ -31,28 +32,42 @@ chandist=sum(abs(chandist),3);
 [~,y]=sort(chandist,2,'ascend');
 
 c_neigbr_r=zeros(nchan,ntrial,nneigbr);
+%tic
+for i=1:nneigbr;
+    az = bsxfun(@minus, tmp.data, mean(tmp.data,2));
+    bz = bsxfun(@minus, tmp.data(y(:,i+1),:,:), mean(tmp.data(y(:,i+1),:,:),3));
+    % Standard Pearson correlation coefficient formula
+    a2 = az .^ 2;
+    b2 = bz .^ 2;
+    ab = az .* bz;
+    c_neigbr_r(:,:,i)=squeeze(sum(ab,2)./sqrt(sum(a2,2).*sum(b2,2)));
+end
+%toc
+%disp('booya')
 
-if strcmp(g.plot_figs,'on')
-    hchanr = waitbar(0,['Calculating nearest reighbour r for channel 0 of ', num2str(nchan), '...']);
-end
-for i=1:nchan;
-    if strcmp(g.plot_figs,'on')
-        waitbar(i/EEG.nbchan,hchanr, ...
-            ['Calculating nearest reighbour r for channel ' num2str(i), ' of ', num2str(nchan), '...'])
-    end
-    for ii=1:ntrial;
-        %tic
-        for iii=1:nneigbr;
-            tmp_neigbr_r=corrcoef(squeeze(tmp.data(i,:,ii)),squeeze(tmp.data(y(i,iii+1),:,ii)));
-            if max(size(tmp_neigbr_r))==1;%Octave returns singlton...
-                c_neigbr_r(i,ii,iii)=tmp_neigbr_r;
-            else % Matlab returns 2 x2 array...
-                c_neigbr_r(i,ii,iii)=tmp_neigbr_r(1,2);
-            end
-        end
-        %toc
-    end
-end
+%if strcmp(g.plot_figs,'on')
+%    hchanr = waitbar(0,['Calculating nearest reighbour r for channel 0 of ', num2str(nchan), '...']);
+%end
+%tic
+%for i=1:nchan;
+%    if strcmp(g.plot_figs,'on')
+%        waitbar(i/EEG.nbchan,hchanr, ...
+%            ['Calculating nearest reighbour r for channel ' num2str(i), ' of ', num2str(nchan), '...'])
+%    end
+%    for ii=1:ntrial;
+%        %tic
+%        for iii=1:nneigbr;
+%            tmp_neigbr_r=corrcoef(squeeze(tmp.data(i,:,ii)),squeeze(tmp.data(y(i,iii+1),:,ii)));
+%            if max(size(tmp_neigbr_r))==1;%Octave returns singlton...
+%               c_neigbr_r(i,ii,iii)=tmp_neigbr_r;
+%            else % Matlab returns 2 x2 array...
+%                c_neigbr_r(i,ii,iii)=tmp_neigbr_r(1,2);
+%            end
+%        end
+%        %toc
+%    end
+%end
+%toc
 
 if strcmp(g.plot_figs,'on')
     close(hchanr);
