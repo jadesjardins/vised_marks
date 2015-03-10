@@ -35,7 +35,7 @@ c_neigbr_r=zeros(nchan,ntrial,nneigbr);
 %tic
 for i=1:nneigbr;
     az = bsxfun(@minus, tmp.data, mean(tmp.data,2));
-    bz = bsxfun(@minus, tmp.data(y(:,i+1),:,:), mean(tmp.data(y(:,i+1),:,:),3));
+    bz = bsxfun(@minus, tmp.data(y(:,i+1),:,:), mean(tmp.data(y(:,i+1),:,:),2));
     % Standard Pearson correlation coefficient formula
     a2 = az .^ 2;
     b2 = bz .^ 2;
