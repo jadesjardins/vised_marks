@@ -710,7 +710,11 @@ u(22) = uicontrol('Parent',figh, ...
                         'string', 'Event types', 'callback', 've_eegplot(''drawlegend'', gcbf)');
   end;
 
-  set(u,'Units','Normalized')
+  for i = 1: length(u) % Matlab 2014b OS X compatibility
+      if isprop(eval(['u(' num2str(i) ')']),'Style')
+          set(u(i),'Units','Normalized');
+      end
+  end
   
   % %%%%%%%%%%%%%%%%%%%%%%%%%%%
   % Set up uimenus
